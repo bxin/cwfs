@@ -17,8 +17,9 @@ We'd like to thank Michael Reuter for the help with Python programming.
 INSTALLATION:
 -------------
 
-    The code has been tested under
-    Enthought Canopy Python 2.7.3
+    The code has been tested under:
+    - Enthought Canopy Python 2.7.3
+    - Python 2.7.10 | Anaconda 2.3.0
 
     The NumPy and SciPy modules are needed.
 
