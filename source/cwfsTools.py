@@ -840,8 +840,8 @@ def outParam(filename,algo,inst,I1,I2,model):
     else:
         fout = open(filename, 'w')
         
-    fout.write('intra image: \t %s \t field in deg =(%6.3f, %6.3f)\n'%(I1.filename,I1.fldx,I1.fldy))
-    fout.write('extra image: \t %s \t field in deg =(%6.3f, %6.3f)\n'%(I2.filename,I2.fldx,I2.fldy))
+    fout.write('intra image: \t %s \t field in deg =(%6.3f, %6.3f)\n'%(I1.filename,I1.fieldX,I1.fieldY))
+    fout.write('extra image: \t %s \t field in deg =(%6.3f, %6.3f)\n'%(I2.filename,I2.fieldX,I2.fieldY))
     fout.write('Using optical model:\t %s\n'%model)
     fout.write('\n')
     finst = open(inst.filename)

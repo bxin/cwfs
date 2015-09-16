@@ -21,37 +21,37 @@ from cwfsTools import extractArray
 
 class donutImage(object):
 
-    def __init__(self, filename,fldxy,type):
+    def __init__(self, filename,fieldXY,type):
 
-        fldx=fldxy[0]
-        fldy=fldxy[1]
+        fieldX=fieldXY[0]
+        fieldY=fieldXY[1]
         
         if (filename.endswith(".txt")):
-            self.I = np.loadtxt(filename)
+            self.image = np.loadtxt(filename)
             #this assumes this txt file is in the format
             # I[0,0]   I[0,1]
             # I[1,0]   I[1,1]
-            self.I = self.I[ ::-1,:] 
+            self.image = self.image[ ::-1,:] 
         else:
             IHDU = fits.open(filename)
-            self.I = IHDU[0].data
+            self.image = IHDU[0].data
             IHDU.close()
-        self.fldx=fldx
-        self.fldy=fldy
-        self.fldr = np.sqrt(self.fldx**2+self.fldy**2)
+        self.fieldX=fieldX
+        self.fieldY=fieldY
+        self.fldr = np.sqrt(self.fieldX**2+self.fieldY**2)
         self.type=type
-        self.sizeinPix = self.I.shape[0]
+        self.sizeinPix = self.image.shape[0]
         self.filename=filename
 
     def makeMaskList(self,inst): #if we pass inst.maskParam, a try: catch: is needed in cwfs.py
-        if (self.fldx==0 and self.fldy==0 ):
+        if (self.fieldX==0 and self.fieldY==0 ):
             if inst.obscuration == 0:
                 self.masklist = np.array([0, 0, 1, 1])
             else:
                 self.masklist = np.array([[0, 0, 1, 1], [0, 0, inst.obscuration, 0]])
         else:
-            self.maskCa, self.maskRa, self.maskCb, self.maskRb = interpMaskParam(self.fldx,self.fldy,inst.maskParam)
-            cax, cay, cbx, cby = rotateMaskParam(self.maskCa,self.maskCb,self.fldx,self.fldy) #only change the center
+            self.maskCa, self.maskRa, self.maskCb, self.maskRb = interpMaskParam(self.fieldX,self.fieldY,inst.maskParam)
+            cax, cay, cbx, cby = rotateMaskParam(self.maskCa,self.maskCb,self.fieldX,self.fieldY) #only change the center
             self.masklist=np.array([[0, 0, 1, 1],[0, 0, inst.obscuration, 0],[cax, cay, self.maskRa, 1],[cbx, cby, self.maskRb, 0]])
 
     def makeMask(self, inst, boundaryT, maskScalingFactor ):
@@ -102,12 +102,12 @@ class donutImage(object):
             for j in range(sn):
                 for k in range(oversample):
                     for l in range(oversample):
-                        newI[(i-1)*oversample+k,(j-1)*oversample+l]=self.I[i,j]/oversample/oversample;
-        self.I=newI
+                        newI[(i-1)*oversample+k,(j-1)*oversample+l]=self.image[i,j]/oversample/oversample;
+        self.image=newI
 
     def imageCoCenter(self,inst,algo):
 
-        x1, y1, tmp = getCenterAndR_ef(self.I)
+        x1, y1, tmp = getCenterAndR_ef(self.image)
         if algo.debug_level>=3:
             print('imageCoCenter: (x1,y1)=(%8.2f,%8.2f)\n'%(x1,y1))
         
@@ -120,8 +120,8 @@ class donutImage(object):
             radialShift=0
 
         if self.fldr != 0:
-            I1c = self.fldx/self.fldr
-            I1s = self.fldy/self.fldr
+            I1c = self.fieldX/self.fldr
+            I1s = self.fieldY/self.fldr
         else:
             I1c=0
             I1s=0
@@ -129,15 +129,15 @@ class donutImage(object):
         stampCenterx1=stampCenterx1+radialShift*I1c
         stampCentery1=stampCentery1+radialShift*I1s
 
-        self.I=np.roll(self.I,int(np.round(stampCentery1-y1)),axis=0)
-        self.I=np.roll(self.I,int(np.round(stampCenterx1-x1)),axis=1)
+        self.image=np.roll(self.image,int(np.round(stampCentery1-y1)),axis=0)
+        self.image=np.roll(self.image,int(np.round(stampCenterx1-x1)),axis=1)
 
     def compensate(self, inst,algo,zcCol, oversample,model):
 
         if ((zcCol.ndim ==1) and (len(zcCol) !=algo.numTerms)):
             raise Exception('input:size','zcCol in compensate needs to be a %d row column vector\n'%algo.numTerms)
 
-        sm, sn = self.I.shape
+        sm, sn = self.image.shape
         if (sm !=sn ):
             raise Exception('=========Error in fcompensate.m: real image is not a square. \n')
             return
@@ -155,7 +155,7 @@ class donutImage(object):
 
         show_lutxyp = showProjection(lutxp, lutyp, inst.sensorFactor, projSamples,0);
 
-        realcx, realcy, tmp = getCenterAndR_ef(self.I)
+        realcx, realcy, tmp = getCenterAndR_ef(self.image)
         show_lutxyp=padArray(show_lutxyp,projSamples+20)
 
         struct0 = ndimage.generate_binary_structure(2, 1)
@@ -175,8 +175,8 @@ class donutImage(object):
         shiftx = (projcx - realcx)
         # +(-) means we need to move image upward (downward)
         shifty = (projcy - realcy)
-        self.I= np.roll(self.I, int(np.round(shifty)), axis=0)
-        self.I= np.roll(self.I, int(np.round(shiftx)), axis=1)
+        self.image= np.roll(self.image, int(np.round(shifty)), axis=0)
+        self.image= np.roll(self.image, int(np.round(shiftx)), axis=1)
 
         #% let's construct the interpolant, to get the intensity on (x',p') plane
         #% that corresponds to the grid points on (x,y)
@@ -187,22 +187,22 @@ class donutImage(object):
 
         # xp = reshape(xp,sm^2,1);
         # yp = reshape(yp,sm^2,1);
-        # self.I = reshape(self.I,sm^2,1);
+        # self.image = reshape(self.image,sm^2,1);
         #  
-        # FIp = TriScatteredInterp(xp,yp,self.I,'nearest');
+        # FIp = TriScatteredInterp(xp,yp,self.image,'nearest');
         # lutIp = FIp(lutxp, lutyp);
  
         lutxp[np.isnan(lutxp)] = 0
         lutyp[np.isnan(lutyp)] = 0
     
-        #    lutIp=interp2(xp,yp,self.I,lutxp,lutyp)
-        #    print xp.shape, yp.shape, self.I.shape
+        #    lutIp=interp2(xp,yp,self.image,lutxp,lutyp)
+        #    print xp.shape, yp.shape, self.image.shape
         #    print lutxp.ravel()
         #    print xp[:,0],yp[0,:]
-        ip = interpolate.RectBivariateSpline( yp[:,0], xp[0,:], self.I,kx=1,ky=1)
+        ip = interpolate.RectBivariateSpline( yp[:,0], xp[0,:], self.image,kx=1,ky=1)
 
-        #    ip = interpolate.interp2d(xp, yp, self.I)
-        #    ip = interpolate.interp2d(xp, yp, self.I)
+        #    ip = interpolate.interp2d(xp, yp, self.image)
+        #    ip = interpolate.interp2d(xp, yp, self.image)
         #    print lutxp.shape, lutyp.shape
         #    lutIp = ip(0.5, -0.5)
         #    print lutIp, 'lutIp1'
@@ -215,21 +215,21 @@ class donutImage(object):
             lutIp[i] = ip(yy, xx)
         lutIp = lutIp.reshape(lutxp.shape)
     
-        self.I = lutIp * J
+        self.image = lutIp * J
 
         if (self.type == 'extra'):
-            self.I = np.rot90( self.I, k=2 )
+            self.image = np.rot90( self.image, k=2 )
 
 
         #if we want the compensator to drive down tip-tilt
-        # self.I = offsetImg(-shiftx, -shifty, self.I);
-        # self.I=circshift(self.I,[round(-shifty) round(-shiftx)]);
+        # self.image = offsetImg(-shiftx, -shifty, self.image);
+        # self.image=circshift(self.image,[round(-shifty) round(-shiftx)]);
 
-        self.I[np.isnan(self.I)]=0
-        # self.I < 0 will not be physical, remove that region
-        # x(self.I<0) = NaN;
+        self.image[np.isnan(self.image)]=0
+        # self.image < 0 will not be physical, remove that region
+        # x(self.image<0) = NaN;
         self.caustic = 0;
-        if (self.I.min() < 0):
+        if (self.image.min() < 0):
             print('WARNING: negative scale parameter, image is within caustic, zcCol (in um)=\n');
     
         #    for i in range(len(zcCol)):
@@ -238,12 +238,12 @@ class donutImage(object):
         #    print('\n');
             self.caustic=1;
 
-        self.I[self.I<0] = 0;
+        self.image[self.image<0] = 0;
         if (oversample>1):
-            self.I=downResolution(self.I,oversample,sm,sn)
+            self.image=downResolution(self.image,oversample,sm,sn)
 
     def showImage(self):
-        plt.imshow(self.I,origin='lower')
+        plt.imshow(self.image,origin='lower')
         plt.colorbar()
         plt.title(self.type)
         plt.show()
@@ -278,8 +278,8 @@ def getOffAxisCorr_single(confFile,fldr):
 
     return corr_coeff
 
-def interpMaskParam(fldx,fldy,maskParam):
-    fldr = np.sqrt(fldx**2+fldy**2)
+def interpMaskParam(fieldX,fieldY,maskParam):
+    fldr = np.sqrt(fieldX**2+fieldY**2)
 
     c = np.loadtxt(maskParam)
     ruler = np.sqrt(2*c[:,0]**2)
@@ -310,11 +310,11 @@ def interpMaskParam(fldx,fldy,maskParam):
 
     return ca, ra, cb, rb
 
-def rotateMaskParam(ca,cb,fldx,fldy):
+def rotateMaskParam(ca,cb,fieldX,fieldY):
 
-    fldr=np.sqrt(fldx**2+fldy**2)
-    c = fldx/fldr
-    s = fldy/fldr
+    fldr=np.sqrt(fieldX**2+fieldY**2)
+    c = fieldX/fldr
+    s = fieldY/fldr
     
     cax = c*ca
     cay = s*ca
@@ -410,15 +410,15 @@ def getCenterAndR_ef(oriArray,readRand=1):
     #print realcx, realcy, realR
     return realcx, realcy, realR
 
-def  createPupilGrid(lutx,luty,onepixel,ca,cb,ra,rb,fldx,fldy=None):
+def  createPupilGrid(lutx,luty,onepixel,ca,cb,ra,rb,fieldX,fieldY=None):
     """Create the pupil grid"""
 
-    if (fldy ==None):
-        fldr=fldx
-        fldx=fldr/1.4142
-        fldy=fldx
+    if (fieldY ==None):
+        fldr=fieldX
+        fieldX=fldr/1.4142
+        fieldY=fieldX
 
-    cax, cay, cbx, cby = rotateMaskParam(ca,cb,fldx,fldy)
+    cax, cay, cbx, cby = rotateMaskParam(ca,cb,fieldX,fieldY)
 
     lutr = np.sqrt((lutx-cax)**2 + (luty-cay)**2)
     tmp=lutr.copy()
@@ -475,7 +475,7 @@ def aperture2image(Im,inst,algo,zcCol,lutx,luty,projSamples,model):
 
     if (model == 'offAxis'):
         lutx, luty = createPupilGrid(lutx,luty,onepixel,
-                                     Im.maskCa,Im.maskCb,Im.maskRa,Im.maskRb,Im.fldx,Im.fldy)
+                                     Im.maskCa,Im.maskCb,Im.maskRa,Im.maskRb,Im.fieldX,Im.fieldY)
 
     if (model == 'paraxial'):
         lutxp = lutx
@@ -496,14 +496,14 @@ def aperture2image(Im,inst,algo,zcCol,lutx,luty,projSamples,model):
             cx=-cx #this will be inverted back by typesign later on.
             cy=-cy #we do the inversion here to make the (x,y)->(x',y') equations has the same form as the paraxial case.
 
-        costheta = (Im.fldx+Im.fldy)/Im.fldr/1.4142
+        costheta = (Im.fieldX+Im.fieldY)/Im.fldr/1.4142
         if (costheta>1):
             costheta=1
         elif (costheta<-1):
             costheta = -1
 
         sintheta = np.sqrt(1-costheta**2)
-        if (Im.fldy<Im.fldx):
+        if (Im.fieldY<Im.fieldX):
             sintheta = -sintheta
 
         lutx0 = lutx*costheta + luty*sintheta #first rotate back to reference orientation

@@ -122,8 +122,8 @@ class cwfsAlgo(object):
 
     def createSignal(self, inst,I1, I2, cliplevel):
 
-        m1, n1 = I1.I.shape
-        m2, n2 = I2.I.shape
+        m1, n1 = I1.image.shape
+        m2, n2 = I2.image.shape
 
         if( m1 != n1 ):
             raise Exception( 'EFSignal: I1 is not square' )
@@ -131,8 +131,8 @@ class cwfsAlgo(object):
         if( (m1 != m2) or (n1 != n2) ):
             raise Exception( 'EFSignal: I1 and I2 are not the same size' )
 
-        I1 = I1.I
-        I2 = np.rot90(I2.I.copy(), k=2 ) #do not change m.I2 in PoissionSolver.m (
+        I1 = I1.image
+        I2 = np.rot90(I2.image.copy(), k=2 ) #do not change I2.image in PoissionSolver.m (
 
         num = I1 - I2 # -(I2-I1), the - is from S itself, see Eq.(4) of our SPIE
         den = I1 + I2
@@ -159,8 +159,8 @@ class cwfsAlgo(object):
 
     def getdIandI(self,I1,I2):
     
-        m1, n1 = I1.I.shape
-        m2, n2 = I2.I.shape
+        m1, n1 = I1.image.shape
+        m2, n2 = I2.image.shape
 
         if( m1 != n1 ):
             print( 'getdIandI: I1 is not square' )
@@ -170,10 +170,10 @@ class cwfsAlgo(object):
             print( 'getdIandI: I1 and I2 are not the same size' )
             exit()
 
-        I1 = I1.I
-        I2 = np.rot90(I2.I, 2 )
+        I1 = I1.image
+        I2 = np.rot90(I2.image, 2 )
 
-        self.I = (I1+I2)/2
+        self.image = (I1+I2)/2
         self.dI = I2 - I1
 
     def solvePoissonEq(self,inst,I1,I2, iOutItr=0):
@@ -303,7 +303,7 @@ class cwfsAlgo(object):
             for i in range(self.numTerms):
                 for j in range(self.numTerms):
                     self.Mij[i,j]=aperturePixelSize**2/(inst.apertureDiameter/2)**2* \
-                        np.sum(np.sum(self.I*(dZidx[i,:,:].squeeze()*dZidx[j,:,:].squeeze() \
+                        np.sum(np.sum(self.image*(dZidx[i,:,:].squeeze()*dZidx[j,:,:].squeeze() \
                                                 + dZidy[i,:,:].squeeze()*dZidy[j,:,:].squeeze() )))
     
             dz=2*inst.focalLength*(inst.focalLength-inst.offset)/inst.offset
@@ -487,10 +487,10 @@ def getZer4Up(algo,unit):
         return algo.converge[3:,-1]*1e6
     
 def applyI1I2pMask(algo,I1,I2):
-    if (I1.fldx != I2.fldx or I1.fldy != I2.fldy):        
-        I1.I = I1.I * algo.pMask            
-        I2.I = I2.I * np.rot90(algo.pMask, 2)
-        I1.I = I1.I / np.sum(I1.I)            
-        I2.I = I2.I / np.sum(I2.I)        #no need vignetting correction, this is after masking already
+    if (I1.fieldX != I2.fieldX or I1.fieldY != I2.fieldY):        
+        I1.image = I1.image * algo.pMask            
+        I2.image = I2.image * np.rot90(algo.pMask, 2)
+        I1.image = I1.image / np.sum(I1.image)            
+        I2.image = I2.image / np.sum(I2.image)        #no need vignetting correction, this is after masking already
     return I1, I2
 
