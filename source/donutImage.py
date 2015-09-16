@@ -9,6 +9,7 @@
 import numpy as np
 import scipy.ndimage as ndimage
 import scipy.interpolate as interpolate
+import matplotlib.pyplot as plt
 
 from cwfsTools import ZernikeAnnularGrad
 from cwfsTools import ZernikeGrad
@@ -241,6 +242,11 @@ class donutImage(object):
         if (oversample>1):
             self.I=downResolution(self.I,oversample,sm,sn)
 
+    def showImage(self):
+        plt.imshow(self.I,origin='lower')
+        plt.colorbar()
+        plt.title(self.type)
+        plt.show()
             
 def getOffAxisCorr_single(confFile,fldr):
     c=np.loadtxt(confFile)

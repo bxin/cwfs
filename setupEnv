@@ -1,2 +1,4 @@
+#!/bin/bash
+
 export PYTHONPATH="$PYTHONPATH:cwfs/source/"
 

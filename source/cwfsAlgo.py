@@ -15,7 +15,7 @@ import numpy as np
 import scipy.ndimage as ndimage
 import copy
 
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 from cwfsTools import padArray
 from cwfsTools import extractArray
@@ -196,13 +196,6 @@ class cwfsAlgo(object):
             u2v2[ctrIdx, ctrIdx] = np.inf
 
             self.createSignal(inst, I1,I2, cliplevel)
-
-            #    fig = plt.figure(figsize=(5, 2.2))
-            #    fig.subplots_adjust(left=0.12, right=0.95, bottom=0.2, top=0.9,
-            #                        hspace=0.01, wspace=0.01)
-            #    ax = plt.subplot(111, aspect='equal')
-            #    ax.imshow(s.T, origin='lower')
-            #    plt.show()
     
             #find the indices for a ring of pixels just ouside and just inside the
             #aperture for use in setting dWdn = 0
@@ -472,6 +465,19 @@ class cwfsAlgo(object):
         if not (filename==''):
             f.close()
             
+    def showSignal(self):
+        try:
+            plt.imshow(self.S,origin='lower')
+            plt.colorbar()
+            plt.title('Wavefront signal')
+            plt.show()
+        except AttributeError:
+            print('Wavefront signal is not available')
+            if self.PoissonSolver=='exp':
+                print('because you are using -a exp')
+            else:
+                print('because you have not calculated it.')
+                
 def getZer4Up(algo,unit):
     if unit=='m':
         return algo.converge[3:,-1]

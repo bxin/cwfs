@@ -24,6 +24,7 @@ INSTALLATION:
     The NumPy and SciPy modules are needed.
 
     You need to add "$PWD/source/" to your $PYTHONPATH.
+	(see ./setupEnv)
 	
 ------
 USAGE#1: (on command line)
