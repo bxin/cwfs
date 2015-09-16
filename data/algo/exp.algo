@@ -1,0 +1,28 @@
+###
+
+Boundary_thickness: defines how far the computation mask extends beyond the pupil mask 
+                and, in fft.algo, it is also the width of Neuman boundary where the derivative of the wavefront is set to zero
+
+###
+
+PoissonSolver				exp
+Num_of_Zernikes				22
+#which Zernikes to use
+#ZTerms			4 11 22
+Num_of_outer_itr                        14
+
+#Zernikes -    0: standard, 1: same as system, others: use as obscuration ratio
+Zernikes      				1
+
+Increase_resolution			1
+Feedback_gain                           0.6
+
+#Compensator_mode: can be opd or zer
+Compensator_mode                        zer
+
+Compensator_oversample                  1
+OffAxis_poly_order                      10
+Compensation_sequence                   comp_sequ_14.txt
+Boundary_thickness (pixel)              8
+
+

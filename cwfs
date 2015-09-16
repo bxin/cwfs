@@ -1,0 +1,13 @@
+#!/bin/csh -f
+##
+## @package cwfs
+## @file cwfs
+## @brief main script to run cwfs
+##
+## @brief Created by:
+## @authors: Bo Xin & Chuck Claver
+## @       Large Synoptic Survey Telescope
+
+## See the README file for its usage.
+python source/cwfs.py $argv
+

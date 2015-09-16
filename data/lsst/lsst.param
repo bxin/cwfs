@@ -1,0 +1,8 @@
+#lsst telescope parameters:
+Obscuration 				0.61
+Focal_length (m)			10.312
+Aperture_diameter (m)   		8.36
+Offset (m)				1.00e-3
+Pixel_size (m)				10e-6
+Mask_param				mask_migrate.txt
+Marginal_fl (m)				9.42693

@@ -1,0 +1,84 @@
+------------------------------------------------------------
+Curvature Wavefront Sensing (CWFS) Software v1.0
+------------------------------------------------------------
+
+    This software package consists of a set of Python codes that take a pair of defocused star images equally spaced on both size of the optical focus, and calculate the incoming wavefront. The underlying baseline algorithms implemented are the iterative FFT method by the Roddiers and the series expansion based method by Gureyev and Nugent. We have made several modifications to make them work for LSST, to overcome challenges including a highly obscured pupil, the fast f-number, pupil distortion and vignetting at the field corners, and variation of the wavefront over the area covered by the split-sensors.
+	    
+    Please reference Xin et al., arXiv:1506.04839. As of September 2015, the paper has been accepted for publication by Applied Optics.
+
+    Note that the off-axis corrections and pupil geometry as functions of field position are specific to each telescope. We have modelled these for LSST. The data can be found in data/lsst/. It may require some additional work to model these properly for your application.
+	
+    Authors:    Bo Xin, Chuck Claver
+Large Synoptic Survey Telescope (LSST)
+
+We'd like to thank Michael Reuter for the help with Python programming.
+	
+-------------
+INSTALLATION:
+-------------
+
+    The code has been tested under
+    Enthought Canopy Python 2.7.3
+
+    The NumPy and SciPy modules are needed.
+
+    You need to add "$PWD/source/" to your $PYTHONPATH.
+	
+------
+USAGE#1: (on command line)
+------
+
+    To show the help message
+    
+    ./cwfs -h
+
+    usage examples:
+
+    ./cwfs z11_0.25_intra.txt z11_0.25_extra.txt -dir ./testImages/LSST_NE_SN25 -ixy 1.185 1.185 -exy 1.185 1.185 -m offAxis -a exp -d -1
+
+------
+USAGE#2: (in Python environment)
+------
+
+###Load the modules
+from cwfsInstru import cwfsInstru
+from cwfsAlgo import cwfsAlgo
+from donutImage import donutImage
+from cwfsAlgo import getZer4Up
+
+###Define the image objects. Input arguments: file name, field coordinates in deg, image type
+I1=donutImage('./testImages/LSST_NE_SN25/z11_0.25_intra.txt',[1.185,1.185],'intra')
+I2=donutImage('./testImages/LSST_NE_SN25/z11_0.25_extra.txt',[1.185,1.185],'extra')
+
+###Define the instrument. Input arguments: instrument name, size of image stamps
+inst=cwfsInstru('lsst',I1.sizeinPix)
+
+###Define the algorithm being used. Input arguments: baseline algorithm, instrument, debug level
+algo=cwfsAlgo('exp',inst,1)
+
+###Run it
+algo.runIt(inst,I1,I2,'offAxis')
+
+###Get the Zernikes Zn (n>=4)
+zer=getZer4Up(algo,'nm')
+print zer
+    
+------------
+Directories:
+------------
+
+		data:            all input data (instrument specific data and algorithm parameters)
+		output:         suggested dir for your outputs
+		source:         all source files 
+		testImages    intra and extra images on which you may run some initial tests
+		validation      data used together with validation.py for validation tests
+		    
+-------------------
+Files in top level:
+-------------------
+
+		cwfs                       main script
+		COPYING                 license file
+		README                  this file
+		setupEnv                 bash command to set up the python environment needed
+		validation.py            Python script for validation tests (compare to Matlab results)

@@ -1,0 +1,2 @@
+export PYTHONPATH="$PYTHONPATH:cwfs/source/"
+

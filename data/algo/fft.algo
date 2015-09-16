@@ -1,0 +1,40 @@
+###
+
+This file contains the parameters used to define the Poisson Solver properties
+PoissonSolever: "fft" = Fast Fourier Transform method per Roddier & Roddier 1993, "exp" = Series expansion method per Guruyev & Nugent 1996
+Num_of_Zernike: Total number of zernike coefficients fitted to the estimated wavefront map
+Num_of_outer_itr: Total number of times the outer compensation loop is iterated over
+Num_of_inner_itr: Total number of times the inner FFT based solver iterates for each out loop iteration 
+Zernikes:  0 = standard filled, 1 = annular as defined by system, 0 > x > 1 = use as obscuration ratio
+Increase_resolution: Pixel resolution multiplier - must be integer - used for internal computations
+FFT_dimension: 999 = automatically chooses next 2^n integer > than smallest image dimension, else specify 2^n integer > than smallest image dimension
+Feedback_gain: Fraction of inner loop solution that is added to the accumulated solution for compensation 
+Compensator_mode: zer = derivatives and Jacobians calculated from Zernike polynomials, opd = derivitives and Jacobians calculated from wavefront map
+Compensator_oversample: Internal resolution multiplier for the compensator - must be integer
+OffAxis_poly_order: order of polynomial used for off-axis distortion corection - 8 or 10 allowed
+Boundary_thickness: defines how far the computation mask extends beyond the pupil mask
+		and, in fft.algo, it is also the width of Neuman boundary where the derivative of the wavefront is set to zero 
+Compensation_sequence: File name where the comensation sequence is defined - sets compensated zernike order vs iteration
+Sumclip_sequence: File name where the signal clipping sequence is defined
+
+###
+
+PoissonSolver				fft
+Num_of_Zernikes				22
+#which Zernikes to use
+#ZTerms                 4 11 22
+Num_of_outer_itr			14
+Num_of_inner_itr			6 
+
+Zernikes      				1
+Increase_resolution			1
+FFT_dimension (pixel)			999
+Feedback_gain 				0.6 
+Compensator_mode			zer
+Compensator_oversample			1
+OffAxis_poly_order		        10	
+Boundary_thickness (pixel)		1
+Compensation_sequence  			comp_sequ_14.txt
+Sumclip_sequence			sumclip_sequ_14.txt
+
+
