@@ -7,7 +7,6 @@
 # @       Large Synoptic Survey Telescope
 
 import os
-import string
 import numpy as np
 
 

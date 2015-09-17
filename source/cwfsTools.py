@@ -370,7 +370,7 @@ def ZernikeGrad(Z, x, y, atype):
         print('x & y are not the same size')
 
     if(len(Z) > 22):
-        disp('ZernikeGrad() is not implemented with >22 terms')
+        print('ZernikeGrad() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
         Z[21] = 0
@@ -447,7 +447,7 @@ def ZernikeJacobian(Z, x, y, atype):
         print('x & y are not the same size')
 
     if(len(Z) > 22):
-        disp('ZernikeGrad() is not implemented with >22 terms')
+        print('ZernikeGrad() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
         Z[21] = 0
