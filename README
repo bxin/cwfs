@@ -18,8 +18,8 @@ INSTALLATION:
 -------------
 
     The code has been tested under:
-    - Enthought Canopy Python 2.7.3
-    - Python 2.7.10 | Anaconda 2.3.0
+    - Python 2.7.10
+    - Python 3.4.3
 
     The NumPy and SciPy modules are needed.
 
@@ -45,12 +45,12 @@ USAGE#2: (in Python environment)
 ###Load the modules
 from cwfsInstru import cwfsInstru
 from cwfsAlgo import cwfsAlgo
-from donutImage import donutImage
+from cwfsImage import cwfsImage
 from cwfsAlgo import getZer4Up
 
 ###Define the image objects. Input arguments: file name, field coordinates in deg, image type
-I1=donutImage('./testImages/LSST_NE_SN25/z11_0.25_intra.txt',[1.185,1.185],'intra')
-I2=donutImage('./testImages/LSST_NE_SN25/z11_0.25_extra.txt',[1.185,1.185],'extra')
+I1=cwfsImage('./testImages/LSST_NE_SN25/z11_0.25_intra.txt',[1.185,1.185],'intra')
+I2=cwfsImage('./testImages/LSST_NE_SN25/z11_0.25_extra.txt',[1.185,1.185],'extra')
 
 ###Define the instrument. Input arguments: instrument name, size of image stamps
 inst=cwfsInstru('lsst',I1.sizeinPix)
