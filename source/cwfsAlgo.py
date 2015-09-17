@@ -12,7 +12,6 @@
 
 import os
 import sys
-import string
 import numpy as np
 import scipy.ndimage as ndimage
 import copy
@@ -338,7 +337,7 @@ class cwfsAlgo(object):
                         zcCol, xSensor, ySensor, self.zobsR, 'dy')
                 else:
                     F[i] = np.sum(np.sum(
-                        m.dI * ZernikeEval(
+                        self.dI * ZernikeEval(
                             zcCol, xSensor, ySensor))) * aperturePixelSize**2
                     dZidx[i, :, :] = ZernikeGrad(zcCol, xSensor, ySensor, 'dx')
                     dZidy[i, :, :] = ZernikeGrad(zcCol, xSensor, ySensor, 'dy')
