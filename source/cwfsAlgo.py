@@ -424,7 +424,7 @@ class cwfsAlgo(object):
                 print('iter = 0, z4-z%d\n' % (self.numTerms))
                 print(tmp.astype(int))
 
-            #    m.West includes Zernikes presented by m.zc
+            #    self.West includes Zernikes presented by self.zc
             self.Wconverge = self.West
             for j in range(int(self.outerItr)):
                 if not self.caustic:
@@ -460,13 +460,15 @@ class cwfsAlgo(object):
                         print('iter = %d, z4-z%d\n' % (j + 1, self.numTerms))
                         print(tmp.astype(int))
 
-                    # m.West is the estimated wavefront from the
-                    # last run of Poisson
-                    # solver. ztot is what had be compensated before that run.
-                    # m.West includes two parts: latest m.zc, and m.Wres
-                    # m.Wres is the residual wavefront on top of
-                    # m.converge(:,end),
-                    # m.Wres is only available for the iterative FFT algorithm.
+                    # self.West is the estimated wavefront from the
+                    # last run of PoissonSolver (both fft and exp).
+                    # ztot is what had be compensated before that run.
+                    # self.West includes two parts (for fft):
+                    #        latest self.zc, and self.Wres
+                    # self.West includes only self.zc (for exp).
+                    # self.Wres is the residual wavefront on top of
+                    # self.converge(:,end), (or self.Wconverge, in 2D form)
+                    # self.Wres is only available for the fft algorithm.
                     if (self.zobsR == 0):
                         self.Wconverge = ZernikeEval(
                             np.concatenate(([0, 0, 0], ztot[3:]), axis=1),
