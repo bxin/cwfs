@@ -386,6 +386,15 @@ class cwfsAlgo(object):
         except AttributeError:
             pass
 
+        if I1.image.shape[0] != I2.image.shape[1]:
+            print('%s image size = (%d, %d) ' % (
+                I1.type, I1.image.shape[0], I1.image.shape[1]))
+            print('%s image size = (%d, %d) ' % (
+                I2.type, I2.image.shape[0], I2.image.shape[1]))
+            print('Error: The intra and extra image stamps need to \
+be of same size.')
+            exit()
+
         # pupil mask, computational mask, and their parameters
         I1.makeMaskList(inst)
         I2.makeMaskList(inst)
