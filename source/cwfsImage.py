@@ -6,6 +6,8 @@
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope
 
+import sys
+
 import numpy as np
 import scipy.ndimage as ndimage
 import scipy.interpolate as interpolate
@@ -16,9 +18,10 @@ from cwfsTools import ZernikeAnnularGrad
 from cwfsTools import ZernikeGrad
 from cwfsTools import ZernikeAnnularJacobian
 from cwfsTools import ZernikeJacobian
-
 from cwfsTools import padArray
 from cwfsTools import extractArray
+
+from cwfsErrors import nonSquareImageError
 
 
 class cwfsImage(object):
@@ -44,12 +47,15 @@ class cwfsImage(object):
         self.type = type
         self.sizeinPix = self.image.shape[0]
         self.filename = filename
-        if self.image.shape[0] != self.image.shape[1]:
+        try:
+            if self.image.shape[0] != self.image.shape[1]:
+                raise(nonSquareImageError())
+        except nonSquareImageError:
             print('%s image filename = %s ' % (type, filename))
             print('%s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
             print('Error: Only square image stamps are accepted.')
-            exit()
+            sys.exit()
 
     # if we pass inst.maskParam, a try: catch: is needed in cwfs.py
     def makeMaskList(self, inst):

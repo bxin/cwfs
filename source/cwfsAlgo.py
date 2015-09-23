@@ -26,6 +26,8 @@ from cwfsTools import ZernikeAnnularGrad
 from cwfsTools import ZernikeEval
 from cwfsTools import ZernikeGrad
 
+from cwfsErrors import imageDiffSizeError
+
 
 class cwfsAlgo(object):
 
@@ -386,14 +388,17 @@ class cwfsAlgo(object):
         except AttributeError:
             pass
 
-        if I1.image.shape[0] != I2.image.shape[1]:
+        try:
+            if I1.image.shape[0] != I2.image.shape[0]:
+                raise(imageDiffSizeError)
+        except imageDiffSizeError:
             print('%s image size = (%d, %d) ' % (
                 I1.type, I1.image.shape[0], I1.image.shape[1]))
             print('%s image size = (%d, %d) ' % (
                 I2.type, I2.image.shape[0], I2.image.shape[1]))
             print('Error: The intra and extra image stamps need to \
 be of same size.')
-            exit()
+            sys.exit()
 
         # pupil mask, computational mask, and their parameters
         I1.makeMaskList(inst)
