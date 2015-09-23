@@ -583,12 +583,16 @@ be of same size.')
 
 
 def getZer4Up(algo, unit):
+    ztmp = algo.converge[3:,:]
+    ztmp = ztmp[:,np.prod(ztmp,axis=0)!=0]
+    if algo.debug_level>=3:
+        print(ztmp)
     if unit == 'm':
-        return algo.converge[3:, -1]
+        return ztmp[:, -1]
     elif unit == 'nm':
-        return algo.converge[3:, -1] * 1e9
+        return ztmp[:, -1] * 1e9
     elif unit == 'um':
-        return algo.converge[3:, -1] * 1e6
+        return ztmp[:, -1] * 1e6
 
 
 def applyI1I2pMask(algo, I1, I2):
