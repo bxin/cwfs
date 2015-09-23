@@ -122,6 +122,7 @@ class cwfsAlgo(object):
         self.caustic = 0
         self.converge = np.zeros((self.numTerms, self.outerItr + 1))
         self.debug_level = debug_level
+        self.currentIter=0
 
     def makeMasterMask(self, I1, I2):
         self.pMask = I1.pMask * I2.pMask
@@ -208,6 +209,7 @@ class cwfsAlgo(object):
                 -0.5 / aperturePixelSize:(0.5) / aperturePixelSize:
                 1 / self.padDim / aperturePixelSize]
             if self.debug_level >= 3:
+                print('iOuter=%d, cliplevel=%4.2f'%(iOutItr,cliplevel))
                 print(v.shape)
 
             u2v2 = -4 * (np.pi**2) * (u * u + v * v)
@@ -374,7 +376,7 @@ class cwfsAlgo(object):
                     np.concatenate(([0, 0, 0], self.zc[3:]), axis=1),
                     xSensor, ySensor)
 
-    def runIt(self, inst, I1, I2, model):
+    def iter0(self, inst, I1, I2, model):
         # if we want to internally/artificially increase the image resolution
         try:
             if (self.upReso > 1):
@@ -415,68 +417,90 @@ be of same size.')
         # cocenter the images
         I1.imageCoCenter(inst, self)
         I2.imageCoCenter(inst, self)
-
+            
         # we want the compensator always start from I1_0 and I2_0
-        I1_0 = copy.deepcopy(I1)
-        I2_0 = copy.deepcopy(I2)
+        self.I1_0 = I1.image.copy()
+        self.I2_0 = I2.image.copy()
 
         if self.compMode == 'zer':
-            ztot = np.zeros(self.numTerms)
+            self.zcomp = np.zeros(self.numTerms)
             if 'Axis' in model:  # onAxis or offAxis, remove distortion first
-                I1.compensate(inst, self, ztot, 1, model)
-                I2.compensate(inst, self, ztot, 1, model)
+                I1.compensate(inst, self, self.zcomp, 1, model)
+                I2.compensate(inst, self, self.zcomp, 1, model)
 
             I1, I2 = applyI1I2pMask(self, I1, I2)
             self.solvePoissonEq(inst, I1, I2, 0)
             if self.PoissonSolver == 'fft':
-                self.converge[:, 0] = ztot + self.zc[:, self.innerItr - 1]
+                self.converge[:, 0] = self.zcomp + self.zc[:, self.innerItr - 1]
             elif self.PoissonSolver == 'exp':
-                self.converge[:, 0] = ztot + self.zc
-
-            if self.debug_level >= 2:
-                tmp = self.converge[3:, 0] * 1e9
-                print('iter = 0, z4-z%d\n' % (self.numTerms))
-                print(tmp.astype(int))
+                self.converge[:, 0] = self.zcomp + self.zc
 
             #    self.West includes Zernikes presented by self.zc
             self.Wconverge = self.West
-            for j in range(int(self.outerItr)):
+
+        elif (self.compMode == 'opd'):
+            self.wcomp = np.zeros(inst.sensorSamples, inst.sensorSamples)
+
+            if 'Axis' in model:  # onAxis or offAxis, remove distortion first
+                I1.compensate(inst, self, self.wcomp, 1, model)
+                I2.compensate(inst, self, self.wcomp, 1, model)
+                            
+            I1, I2 = applyI1I2pMask(self, I1, I2)
+            self.solvePoissonEq(inst, I1, I2, 0)
+            self.Wconverge = self.West
+            self.converge[:, 0] = ZernikeMaskedFit(
+                self.Wconverge, inst.xSensor, inst.ySensor,
+                self.numTerms, self.pMask, self.zobsR)
+
+        if self.debug_level >= 2:
+            tmp = self.converge[3:, 0] * 1e9
+            print('iter = 0, z4-z%d' % (self.numTerms))
+            print(tmp.astype(int))
+
+        self.currentIter = self.currentIter + 1
+            
+    def nextIter(self, inst, I1, I2, model):
+        if self.currentIter==0:
+            self.iter0(inst,I1,I2,model)
+        else:
+            j = self.currentIter 
+
+            if self.compMode == 'zer':
                 if not self.caustic:
                     if (self.PoissonSolver == 'fft'):
                         ztmp = self.zc[:, -1]
                     else:
                         ztmp = self.zc
-
                     if (self.compSequence.ndim == 1):
-                        ztmp[self.compSequence[j]:] = 0
+                        ztmp[self.compSequence[j-1]:] = 0
                     else:
-                        ztmp = ztmp * self.compSequence[:, j]
+                        ztmp = ztmp * self.compSequence[:, j-1]
 
-                    ztot = ztot + ztmp * self.feedbackGain
+                    self.zcomp = self.zcomp + ztmp * self.feedbackGain
 
-                    I1 = copy.deepcopy(I1_0)
-                    I2 = copy.deepcopy(I2_0)
+                    I1.image = self.I1_0.copy()
+                    I2.image = self.I2_0.copy()
 
-                    I1.compensate(inst, self, ztot, 1, model)
-                    I2.compensate(inst, self, ztot, 1, model)
+                    I1.compensate(inst, self, self.zcomp, 1, model)
+                    I2.compensate(inst, self, self.zcomp, 1, model)
                     if (I1.caustic == 1 or I2.caustic == 1):
                         self.caustic = 1
                     I1, I2 = applyI1I2pMask(self, I1, I2)
-                    self.solvePoissonEq(inst, I1, I2, j)
+                    self.solvePoissonEq(inst, I1, I2, j-1)
                     if self.PoissonSolver == 'fft':
-                        self.converge[:, j + 1] = ztot +\
+                        self.converge[:, j] = self.zcomp +\
                             self.zc[:, self.innerItr - 1]
                     elif self.PoissonSolver == 'exp':
-                        self.converge[:, j + 1] = ztot + self.zc
+                        self.converge[:, j] = self.zcomp + self.zc
 
                     if self.debug_level >= 2:
-                        tmp = self.converge[3:, j + 1] * 1e9
-                        print('iter = %d, z4-z%d\n' % (j + 1, self.numTerms))
+                        tmp = self.converge[3:, j] * 1e9
+                        print('iter = %d, z4-z%d\n' % (j, self.numTerms))
                         print(tmp.astype(int))
 
                     # self.West is the estimated wavefront from the
                     # last run of PoissonSolver (both fft and exp).
-                    # ztot is what had be compensated before that run.
+                    # self.zcomp is what had be compensated before that run.
                     # self.West includes two parts (for fft):
                     #        latest self.zc, and self.Wres
                     # self.West includes only self.zc (for exp).
@@ -485,55 +509,52 @@ be of same size.')
                     # self.Wres is only available for the fft algorithm.
                     if (self.zobsR == 0):
                         self.Wconverge = ZernikeEval(
-                            np.concatenate(([0, 0, 0], ztot[3:]), axis=1),
+                            np.concatenate(([0, 0, 0], self.zcomp[3:]), axis=1),
                             inst.xSensor, inst.ySensor) + self.West
                     else:
                         self.Wconverge = ZernikeAnnularEval(
-                            np.concatenate(([0, 0, 0], ztot[3:]), axis=1),
+                            np.concatenate(([0, 0, 0], self.zcomp[3:]), axis=1),
                             inst.xSensor, inst.ySensor, self.zobsR) + self.West
                 else:
                     # once we run into caustic, stop here, results may be
                     # close to real aberration.
                     # Continuation may lead to disatrous results
-                    self.converge[:, j + 1] = self.converge[:, j]
+                    self.converge[:, j] = self.converge[:, j-1]
 
-        elif (self.compMode == 'opd'):
-            wtot = np.zeros(inst.sensorSamples, inst.sensorSamples)
+            elif (self.compMode == 'opd'):
 
-            self.caustic = 0
-            if 'Axis' in model:  # onAxis or offAxis, remove distortion first
-                I1.compensate(inst, self, wtot, 1, model)
-                I2.compensate(inst, self, wtot, 1, model)
-            I1, I2 = applyI1I2pMask(self, I1, I2)
-            self.solvePoissonEq(inst, I1, I2, 0)
-            Wconverge = wtot + self.West
-            self.converge[:, 0] = ZernikeMaskedFit(
-                Wconverge, inst.xSensor, inst.ySensor,
-                self.numTerms, self.pMask, self.zobsR)
-
-            for j in range(int(self.outerItr)):
                 if not self.caustic:
                     wtmp = self.West
-                    wtot = wtot + wtmp * self.feedbackGain
+                    self.wcomp = self.wcomp + wtmp * self.feedbackGain
 
-                    I1 = copy.deepcopy(I1_0)
-                    I2 = copy.deepcopy(I2_0)
-                    I1.compensate(inst, self, wtot, 1, model)
-                    I2.compensate(inst, self, wtot, 1, model)
+                    I1.image = self.I1_0.copy()
+                    I2.image = self.I2_0.copy()
+                    I1.compensate(inst, self, self.wcomp, 1, model)
+                    I2.compensate(inst, self, self.wcomp, 1, model)
                     if (I1.caustic == 1 or I2.caustic == 1):
                         self.caustic = 1
                     I1, I2 = applyI1I2pMask(self, I1, I2)
-                    self.solvePoissonEq(inst, I1, I2, j)
+                    self.solvePoissonEq(inst, I1, I2, j-1)
 
-                    Wconverge = wtot + self.West
-                    self.converge[:, j] = ZernikeMaskedFit(
-                        Wconverge, inst.xSensor, inst.ySensor,
+                    self.Wconverge = self.wcomp + self.West
+                    self.converge[:, j-1] = ZernikeMaskedFit(
+                        self.Wconverge, inst.xSensor, inst.ySensor,
                         self.numTerms, self.pMask, self.zobsR)
                 else:
                     # once we run into caustic, stop here, results may be
                     # close to real aberration.
                     # Continuation may lead to disatrous results
-                    self.converge[:, j + 1] = self.converge[:, j]
+                    self.converge[:, j] = self.converge[:, j-1]
+
+            self.currentIter = self.currentIter + 1
+            
+
+    def runIt(self, inst, I1, I2, model):
+
+        self.iter0(inst,I1,I2,model)
+        
+        while (self.currentIter<=int(self.outerItr)):
+            self.nextIter(inst,I1,I2,model)
 
     def outZer4Up(self, filename, unit):
         z = getZer4Up(self, unit)

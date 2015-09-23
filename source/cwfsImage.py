@@ -195,11 +195,6 @@ class cwfsImage(object):
                 row column vector\n' % algo.numTerms)
 
         sm, sn = self.image.shape
-        if (sm != sn):
-            raise Exception(
-                '=========Error in fcompensate.m: real image \
-        is not a square. \n')
-            return
 
         projSamples = sm * oversample
 
