@@ -22,7 +22,7 @@ from cwfsTools import padArray
 from cwfsTools import extractArray
 
 from cwfsErrors import nonSquareImageError
-
+from cwfsErrors import oddNumPixError
 
 class cwfsImage(object):
 
@@ -49,14 +49,22 @@ class cwfsImage(object):
         self.filename = filename
         try:
             if self.image.shape[0] != self.image.shape[1]:
-                raise(nonSquareImageError())
+                raise(nonSquareImageError)
+            if self.image.shape[0] % 2 ==1:
+                raise(oddNumPixError)
         except nonSquareImageError:
             print('%s image filename = %s ' % (type, filename))
             print('%s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
             print('Error: Only square image stamps are accepted.')
             sys.exit()
-
+        except oddNumPixError:
+            print('%s image filename = %s ' % (type, filename))
+            print('%s image size = (%d, %d)' % (
+                type, self.image.shape[0], self.image.shape[1]))
+            print('Error: number of pixels cannot be odd numbers')
+            sys.exit()
+            
     # if we pass inst.maskParam, a try: catch: is needed in cwfs.py
     def makeMaskList(self, inst):
         if (self.fieldX == 0 and self.fieldY == 0):

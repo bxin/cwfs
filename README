@@ -58,18 +58,19 @@ USAGE#2: (in Python environment)
 Directories:
 ------------
 
-		data:            all input data (instrument specific data and algorithm parameters)
-		output:         suggested dir for your outputs
-		source:         all source files 
-		testImages    intra and extra images on which you may run some initial tests
-		validation      data used together with validation.py for validation tests
+    data:            all input data (instrument specific data and algorithm parameters)
+    output:         suggested dir for your outputs
+    source:         all source files 
+    testImages    intra and extra images on which you may run some initial tests
+    validation      data used together with validation.py for validation tests
 		    
 -------------------
 Files in top level:
 -------------------
 
-		cwfs                       main script
-		COPYING                 license file
-		README                  this file
-		setupEnv                 bash command to set up the python environment needed
-		validation.py            Python script for validation tests (compare to Matlab results)
+    cwfs                       main script
+    COPYING                 license file
+    README                  this file
+    setupEnv                 bash command to set up the python environment needed
+    validation.py            Python script for validation tests (compare to Matlab results)
+	
