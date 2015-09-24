@@ -17,3 +17,7 @@ class imageDiffSizeError(Exception):
 
     def __init__(self):
         pass
+
+class unknownUnitError(Exception):
+    def __init__(self):
+        pass

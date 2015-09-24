@@ -54,13 +54,13 @@ def main():
                         default=no output')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s 1.0')
-    parser.add_argument('-d', dest='debug_level', type=int,
+    parser.add_argument('-d', dest='debugLevel', type=int,
                         default=0, choices=(-1, 0, 1, 2, 3),
                         help='debug level, -1=quiet, 0=Zernikes, \
                         1=operator, 2=expert, 3=everything, default=0')
     args = parser.parse_args()
 
-    if args.debug_level >= 1:
+    if args.debugLevel >= 1:
         print(args)
 
     # load intra and extra focal images
@@ -72,17 +72,17 @@ def main():
 
     # load instrument and algorithm parameters
     inst = cwfsInstru(args.instruFile, I1.sizeinPix)
-    algo = cwfsAlgo(args.algoFile, inst, args.debug_level)
+    algo = cwfsAlgo(args.algoFile, inst, args.debugLevel)
 
     # run it
     algo.runIt(inst, I1, I2, args.model)
 
     # output Zernikes 4 and up
-    if not(args.outputZer == '') or args.debug_level >= 0:
-        algo.outZer4Up(args.outputZer, 'nm')
+    if not(args.outputZer == '') or args.debugLevel >= 0:
+        algo.outZer4Up('nm', args.outputZer)
 
     # output parameters
-    if not(args.outputParam == '') or args.debug_level >= 1:
+    if not(args.outputParam == '') or args.debugLevel >= 1:
         outParam(args.outputParam, algo, inst, I1, I2, args.model)
 
 if __name__ == "__main__":

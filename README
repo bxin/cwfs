@@ -46,29 +46,14 @@ USAGE#1: (on command line)
 USAGE#2: (in Python environment)
 ------
 
-###Load the modules
-from cwfsInstru import cwfsInstru
-from cwfsAlgo import cwfsAlgo
-from cwfsImage import cwfsImage
-from cwfsAlgo import getZer4Up
+    Please see the the two iPython notebooks in the home directory:
+	example1.ipynb
+	example2.ipynb
 
-###Define the image objects. Input arguments: file name, field coordinates in deg, image type
-I1=cwfsImage('./testImages/LSST_NE_SN25/z11_0.25_intra.txt',[1.185,1.185],'intra')
-I2=cwfsImage('./testImages/LSST_NE_SN25/z11_0.25_extra.txt',[1.185,1.185],'extra')
-
-###Define the instrument. Input arguments: instrument name, size of image stamps
-inst=cwfsInstru('lsst',I1.sizeinPix)
-
-###Define the algorithm being used. Input arguments: baseline algorithm, instrument, debug level
-algo=cwfsAlgo('exp',inst,1)
-
-###Run it
-algo.runIt(inst,I1,I2,'offAxis')
-
-###Get the Zernikes Zn (n>=4)
-zer=getZer4Up(algo,'nm')
-print zer
-    
+    example1.ipynb shows how a user defines the two defocused images, the instrument, the algorithm, then run everything with the default settings.
+    	
+    example2.ipynb shows a more complex work session, where the user runs the iterations manually, and examine the results after each iteration.
+	
 ------------
 Directories:
 ------------

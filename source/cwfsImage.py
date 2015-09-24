@@ -160,7 +160,7 @@ class cwfsImage(object):
     def imageCoCenter(self, inst, algo):
 
         x1, y1, tmp = getCenterAndR_ef(self.image)
-        if algo.debug_level >= 3:
+        if algo.debugLevel >= 3:
             print('imageCoCenter: (x1,y1)=(%8.2f,%8.2f)\n' % (x1, y1))
 
         stampCenterx1 = inst.sensorSamples / 2. + 0.5

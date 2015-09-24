@@ -35,6 +35,7 @@ Compensator_oversample			1
 OffAxis_poly_order		        10	
 Boundary_thickness (pixel)		1
 Compensation_sequence  			comp_sequ_14.txt
-Sumclip_sequence			sumclip_sequ_14.txt
+#below, the Poisson solver needs to be run 15 times, when we compensate 14 times.
+Sumclip_sequence			sumclip_sequ_15.txt
 
 
