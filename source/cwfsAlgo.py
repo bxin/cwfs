@@ -14,7 +14,6 @@ import os
 import sys
 import numpy as np
 import scipy.ndimage as ndimage
-import copy
 
 import matplotlib.pyplot as plt
 
@@ -28,6 +27,7 @@ from cwfsTools import ZernikeGrad
 
 from cwfsErrors import imageDiffSizeError
 from cwfsErrors import unknownUnitError
+
 
 class cwfsAlgo(object):
 
@@ -122,7 +122,7 @@ class cwfsAlgo(object):
         self.caustic = 0
         self.converge = np.zeros((self.numTerms, self.outerItr + 1))
         self.debugLevel = debugLevel
-        self.currentIter=0
+        self.currentIter = 0
 
     def makeMasterMask(self, I1, I2):
         self.pMask = I1.pMask * I2.pMask
@@ -209,7 +209,7 @@ class cwfsAlgo(object):
                 -0.5 / aperturePixelSize:(0.5) / aperturePixelSize:
                 1 / self.padDim / aperturePixelSize]
             if self.debugLevel >= 3:
-                print('iOuter=%d, cliplevel=%4.2f'%(iOutItr,cliplevel))
+                print('iOuter=%d, cliplevel=%4.2f' % (iOutItr, cliplevel))
                 print(v.shape)
 
             u2v2 = -4 * (np.pi**2) * (u * u + v * v)
@@ -378,7 +378,7 @@ class cwfsAlgo(object):
 
     def iter0(self, inst, I1, I2, model):
 
-        self.reset(I1,I2)
+        self.reset(I1, I2)
         # if we want to internally/artificially increase the image resolution
         try:
             if (self.upReso > 1):
@@ -419,9 +419,9 @@ be of same size.')
         # cocenter the images
         I1.imageCoCenter(inst, self)
         I2.imageCoCenter(inst, self)
-            
+
         # we want the compensator always start from I1.image0 and I2.image0
-        if hasattr(I1,'image0') or hasattr(I2,'image0'):
+        if hasattr(I1, 'image0') or hasattr(I2, 'image0'):
             pass
         else:
             I1.image0 = I1.image.copy()
@@ -436,7 +436,8 @@ be of same size.')
             I1, I2 = applyI1I2pMask(self, I1, I2)
             self.solvePoissonEq(inst, I1, I2, 0)
             if self.PoissonSolver == 'fft':
-                self.converge[:, 0] = self.zcomp + self.zc[:, self.innerItr - 1]
+                self.converge[:, 0] = self.zcomp + \
+                    self.zc[:, self.innerItr - 1]
             elif self.PoissonSolver == 'exp':
                 self.converge[:, 0] = self.zcomp + self.zc
 
@@ -449,7 +450,7 @@ be of same size.')
             if 'Axis' in model:  # onAxis or offAxis, remove distortion first
                 I1.compensate(inst, self, self.wcomp, 1, model)
                 I2.compensate(inst, self, self.wcomp, 1, model)
-                            
+
             I1, I2 = applyI1I2pMask(self, I1, I2)
             self.solvePoissonEq(inst, I1, I2, 0)
             self.Wconverge = self.West
@@ -463,12 +464,12 @@ be of same size.')
             print(np.rint(tmp))
 
         self.currentIter = self.currentIter + 1
-            
+
     def nextIter(self, inst, I1, I2, model):
-        if self.currentIter==0:
-            self.iter0(inst,I1,I2,model)
+        if self.currentIter == 0:
+            self.iter0(inst, I1, I2, model)
         else:
-            j = self.currentIter 
+            j = self.currentIter
 
             if self.compMode == 'zer':
                 if not self.caustic:
@@ -477,9 +478,9 @@ be of same size.')
                     else:
                         ztmp = self.zc
                     if (self.compSequence.ndim == 1):
-                        ztmp[self.compSequence[j-1]:] = 0
+                        ztmp[self.compSequence[j - 1]:] = 0
                     else:
-                        ztmp = ztmp * self.compSequence[:, j-1]
+                        ztmp = ztmp * self.compSequence[:, j - 1]
 
                     self.zcomp = self.zcomp + ztmp * self.feedbackGain
 
@@ -509,17 +510,19 @@ be of same size.')
                     # self.Wres is only available for the fft algorithm.
                     if (self.zobsR == 0):
                         self.Wconverge = ZernikeEval(
-                            np.concatenate(([0, 0, 0], self.zcomp[3:]), axis=1),
+                            np.concatenate(
+                                ([0, 0, 0], self.zcomp[3:]), axis=1),
                             inst.xSensor, inst.ySensor) + self.West
                     else:
                         self.Wconverge = ZernikeAnnularEval(
-                            np.concatenate(([0, 0, 0], self.zcomp[3:]), axis=1),
+                            np.concatenate(
+                                ([0, 0, 0], self.zcomp[3:]), axis=1),
                             inst.xSensor, inst.ySensor, self.zobsR) + self.West
                 else:
                     # once we run into caustic, stop here, results may be
                     # close to real aberration.
                     # Continuation may lead to disatrous results
-                    self.converge[:, j] = self.converge[:, j-1]
+                    self.converge[:, j] = self.converge[:, j - 1]
 
             elif (self.compMode == 'opd'):
 
@@ -537,14 +540,14 @@ be of same size.')
                     self.solvePoissonEq(inst, I1, I2, j)
 
                     self.Wconverge = self.wcomp + self.West
-                    self.converge[:, j-1] = ZernikeMaskedFit(
+                    self.converge[:, j - 1] = ZernikeMaskedFit(
                         self.Wconverge, inst.xSensor, inst.ySensor,
                         self.numTerms, self.pMask, self.zobsR)
                 else:
                     # once we run into caustic, stop here, results may be
                     # close to real aberration.
                     # Continuation may lead to disatrous results
-                    self.converge[:, j] = self.converge[:, j-1]
+                    self.converge[:, j] = self.converge[:, j - 1]
 
             self.currentIter = self.currentIter + 1
 
@@ -553,13 +556,12 @@ be of same size.')
                 print('iter = %d, z4-z%d' % (j, self.numTerms))
                 print(np.rint(tmp))
 
-
-    def runIt(self, inst, I1, I2, model,nIter=1e9):
+    def runIt(self, inst, I1, I2, model, nIter=1e9):
 
         i = 0
-        while (self.currentIter<=int(self.outerItr) and i<nIter):
+        while (self.currentIter <= int(self.outerItr) and i < nIter):
             i = i + 1
-            self.nextIter(inst,I1,I2,model)
+            self.nextIter(inst, I1, I2, model)
 
     def outZer4Up(self, unit, filename=''):
         z = getZer4Up(self, unit)
@@ -568,7 +570,8 @@ be of same size.')
         else:
             f = open(filename, 'w')
 
-        f.write('----Zernikes after Iter No. %d-------\n'%(self.currentIter-1))
+        f.write('----Zernikes after Iter No. %d-------\n' %
+                (self.currentIter - 1))
         for i in range(4, self.numTerms + 1):
             f.write('%d\t %8.0f\n' % (i, z[i - 4]))
         if not (filename == ''):
@@ -590,33 +593,34 @@ be of same size.')
     def plotZer(self, unit):
         z = getZer4Up(self, unit)
         x = range(4, self.numTerms + 1)
-        plt.plot(x, z, #label='',
-             marker='o', color='r', markersize=10)
+        plt.plot(x, z,  # label='',
+                 marker='o', color='r', markersize=10)
         plt.xlabel('Zernike Index')
-        plt.ylabel('Zernike coefficient (%s)'%unit)
+        plt.ylabel('Zernike coefficient (%s)' % unit)
         plt.grid()
         plt.show()
-        
-    def setDebugLevel(self,debugLevel):
-        self.debugLevel=debugLevel
 
-    def reset(self,I1,I2):
+    def setDebugLevel(self, debugLevel):
+        self.debugLevel = debugLevel
+
+    def reset(self, I1, I2):
         self.currentIter = 0
-        if self.debugLevel>=3:
+        if self.debugLevel >= 3:
             print('resetting images')
-        
+
         try:
             I1.image = I1.image0.copy()
             I2.image = I2.image0.copy()
-            if self.debugLevel>=3:
+            if self.debugLevel >= 3:
                 print('resetting images, inside')
         except AttributeError:
             pass
-            
+
+
 def getZer4Up(algo, unit):
-    ztmp = algo.converge[3:,:]
-    ztmp = ztmp[:,np.prod(ztmp,axis=0)!=0]
-    if algo.debugLevel>=3:
+    ztmp = algo.converge[3:, :]
+    ztmp = ztmp[:, np.prod(ztmp, axis=0) != 0]
+    if algo.debugLevel >= 3:
         print(ztmp.shape)
         print(ztmp)
     try:
@@ -629,11 +633,11 @@ def getZer4Up(algo, unit):
         else:
             raise(unknownUnitError)
     except unknownUnitError:
-        print('Unknown unit: %s'%unit)
+        print('Unknown unit: %s' % unit)
         print('Known options are: m, nm, um')
         sys.exit()
 
-        
+
 def applyI1I2pMask(algo, I1, I2):
     if (I1.fieldX != I2.fieldX or I1.fieldY != I2.fieldY):
         I1.image = I1.image * algo.pMask
