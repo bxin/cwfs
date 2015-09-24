@@ -122,7 +122,7 @@ class cwfsAlgo(object):
         self.caustic = 0
         self.converge = np.zeros((self.numTerms, self.outerItr + 1))
         self.debugLevel = debugLevel
-        self.currentIter = 0
+        self.currentItr = 0
 
     def makeMasterMask(self, I1, I2):
         self.pMask = I1.pMask * I2.pMask
@@ -376,7 +376,7 @@ class cwfsAlgo(object):
                     np.concatenate(([0, 0, 0], self.zc[3:]), axis=1),
                     xSensor, ySensor)
 
-    def iter0(self, inst, I1, I2, model):
+    def itr0(self, inst, I1, I2, model):
 
         self.reset(I1, I2)
         # if we want to internally/artificially increase the image resolution
@@ -460,16 +460,17 @@ be of same size.')
 
         if self.debugLevel >= 2:
             tmp = self.converge[3:, 0] * 1e9
-            print('iter = 0, z4-z%d' % (self.numTerms))
+            print('itr = 0, z4-z%d' % (self.numTerms))
             print(np.rint(tmp))
 
-        self.currentIter = self.currentIter + 1
+        self.currentItr = self.currentItr + 1
 
-    def nextIter(self, inst, I1, I2, model):
-        if self.currentIter == 0:
-            self.iter0(inst, I1, I2, model)
+    def singleItr(self, inst, I1, I2, model):
+
+        if self.currentItr == 0:
+            self.itr0(inst, I1, I2, model)
         else:
-            j = self.currentIter
+            j = self.currentItr
 
             if self.compMode == 'zer':
                 if not self.caustic:
@@ -549,19 +550,25 @@ be of same size.')
                     # Continuation may lead to disatrous results
                     self.converge[:, j] = self.converge[:, j - 1]
 
-            self.currentIter = self.currentIter + 1
+            if self.currentItr < int(self.outerItr):
+                self.currentItr = self.currentItr + 1
 
             if self.debugLevel >= 2:
                 tmp = self.converge[3:, j] * 1e9
-                print('iter = %d, z4-z%d' % (j, self.numTerms))
+                print('itr = %d, z4-z%d' % (j, self.numTerms))
                 print(np.rint(tmp))
 
-    def runIt(self, inst, I1, I2, model, nIter=1e9):
-
+    def nextItr(self, inst, I1, I2, model, nItr=1):
         i = 0
-        while (self.currentIter <= int(self.outerItr) and i < nIter):
+        while (i < nItr):
             i = i + 1
-            self.nextIter(inst, I1, I2, model)
+            self.singleItr(inst, I1, I2, model)
+            
+    def runIt(self, inst, I1, I2, model):
+        i = self.currentItr
+        while (i <= int(self.outerItr)):
+            i = i + 1
+            self.singleItr(inst, I1, I2, model)
 
     def outZer4Up(self, unit, filename=''):
         z = getZer4Up(self, unit)
@@ -570,8 +577,8 @@ be of same size.')
         else:
             f = open(filename, 'w')
 
-        f.write('----Zernikes after Iter No. %d-------\n' %
-                (self.currentIter - 1))
+        f.write('----Zernikes after Itr No. %d-------\n' %
+                (self.currentItr - 1))
         for i in range(4, self.numTerms + 1):
             f.write('%d\t %8.0f\n' % (i, z[i - 4]))
         if not (filename == ''):
@@ -604,7 +611,7 @@ be of same size.')
         self.debugLevel = debugLevel
 
     def reset(self, I1, I2):
-        self.currentIter = 0
+        self.currentItr = 0
         if self.debugLevel >= 3:
             print('resetting images')
 
