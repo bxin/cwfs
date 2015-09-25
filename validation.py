@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 from cwfsInstru import cwfsInstru
 from cwfsAlgo import cwfsAlgo
 from cwfsImage import cwfsImage
-from cwfsAlgo import getZer4Up
 
 imgDir = ['../testImages/F1.23_1mm_v61',
           '../testImages/LSST_C_SN26', '../testImages/LSST_C_SN26',
@@ -52,7 +51,7 @@ for j in range(nTest):
     inst = cwfsInstru(myinst, I1.sizeinPix)
     algo = cwfsAlgo(myalgo[j], inst, 1)
     algo.runIt(inst, I1, I2, mymodel[j])
-    zer[:, j] = getZer4Up(algo, 'nm')
+    zer[:, j] = algo.zer4UpNm
 
     matZ[:, j] = np.loadtxt(os.path.join(validationDir, matlabZFile[j]))
 

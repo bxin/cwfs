@@ -11,7 +11,6 @@ import sys
 import numpy as np
 import scipy.ndimage as ndimage
 import scipy.interpolate as interpolate
-import matplotlib.pyplot as plt
 from astropy.io import fits
 
 from cwfsTools import ZernikeAnnularGrad
@@ -313,12 +312,6 @@ class cwfsImage(object):
         self.image[self.image < 0] = 0
         if (oversample > 1):
             self.downResolution(self, oversample, sm, sn)
-
-    def showImage(self):
-        plt.imshow(self.image, origin='lower')
-        plt.colorbar()
-        plt.title(self.type)
-        plt.show()
 
 
 def getOffAxisCorr_single(confFile, fldr):

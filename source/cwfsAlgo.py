@@ -15,8 +15,6 @@ import sys
 import numpy as np
 import scipy.ndimage as ndimage
 
-import matplotlib.pyplot as plt
-
 from cwfsTools import padArray
 from cwfsTools import extractArray
 from cwfsTools import ZernikeMaskedFit
@@ -550,6 +548,10 @@ be of same size.')
                     # Continuation may lead to disatrous results
                     self.converge[:, j] = self.converge[:, j - 1]
 
+            ztmp = self.converge[3:, :]
+            ztmp = ztmp[:, np.prod(ztmp, axis=0) != 0]
+            self.zer4UpNm = ztmp[:, -1] * 1e9 #convert to nm
+            
             if self.currentItr < int(self.outerItr):
                 self.currentItr = self.currentItr + 1
 
@@ -570,43 +572,6 @@ be of same size.')
             i = i + 1
             self.singleItr(inst, I1, I2, model)
 
-    def outZer4Up(self, unit, filename=''):
-        z = getZer4Up(self, unit)
-        if (filename == ''):
-            f = sys.stdout
-        else:
-            f = open(filename, 'w')
-
-        f.write('----Zernikes after Itr No. %d-------\n' %
-                (self.currentItr - 1))
-        for i in range(4, self.numTerms + 1):
-            f.write('%d\t %8.0f\n' % (i, z[i - 4]))
-        if not (filename == ''):
-            f.close()
-
-    def showSignal(self):
-        try:
-            plt.imshow(self.S, origin='lower')
-            plt.colorbar()
-            plt.title('Wavefront signal')
-            plt.show()
-        except AttributeError:
-            print('Wavefront signal is not available')
-            if self.PoissonSolver == 'exp':
-                print('because you are using -a exp')
-            else:
-                print('because you have not calculated it.')
-
-    def plotZer(self, unit):
-        z = getZer4Up(self, unit)
-        x = range(4, self.numTerms + 1)
-        plt.plot(x, z,  # label='',
-                 marker='o', color='r', markersize=10)
-        plt.xlabel('Zernike Index')
-        plt.ylabel('Zernike coefficient (%s)' % unit)
-        plt.grid()
-        plt.show()
-
     def setDebugLevel(self, debugLevel):
         self.debugLevel = debugLevel
 
@@ -622,27 +587,6 @@ be of same size.')
                 print('resetting images, inside')
         except AttributeError:
             pass
-
-
-def getZer4Up(algo, unit):
-    ztmp = algo.converge[3:, :]
-    ztmp = ztmp[:, np.prod(ztmp, axis=0) != 0]
-    if algo.debugLevel >= 3:
-        print(ztmp.shape)
-        print(ztmp)
-    try:
-        if unit == 'm':
-            return ztmp[:, -1]
-        elif unit == 'nm':
-            return ztmp[:, -1] * 1e9
-        elif unit == 'um':
-            return ztmp[:, -1] * 1e6
-        else:
-            raise(unknownUnitError)
-    except unknownUnitError:
-        print('Unknown unit: %s' % unit)
-        print('Known options are: m, nm, um')
-        sys.exit()
 
 
 def applyI1I2pMask(algo, I1, I2):
