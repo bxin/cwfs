@@ -511,12 +511,12 @@ be of same size.')
                         self.Wconverge = ZernikeEval(
                             np.concatenate(
                                 ([0, 0, 0], self.zcomp[3:]), axis=1),
-                            inst.xSensor, inst.ySensor) + self.West
+                            inst.xoSensor, inst.yoSensor) + self.West
                     else:
                         self.Wconverge = ZernikeAnnularEval(
                             np.concatenate(
                                 ([0, 0, 0], self.zcomp[3:]), axis=1),
-                            inst.xSensor, inst.ySensor, self.zobsR) + self.West
+                            inst.xoSensor, inst.yoSensor, self.zobsR) + self.West
                 else:
                     # once we run into caustic, stop here, results may be
                     # close to real aberration.
@@ -560,6 +560,8 @@ be of same size.')
                 print('itr = %d, z4-z%d' % (j, self.numTerms))
                 print(np.rint(tmp))
 
+            #self.Wconverge = self.Wconverge * self.pMask
+            
     def nextItr(self, inst, I1, I2, model, nItr=1):
         i = 0
         while (i < nItr):

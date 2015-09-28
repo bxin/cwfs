@@ -1103,3 +1103,30 @@ def outParam(filename, algo, inst, I1, I2, model):
 
     if not (filename == ''):
         fout.close()
+
+def outZer4Up(z, unit, filename=''):
+    try:
+        if unit == 'm':
+            z = z * 1e-9
+        elif unit == 'nm':
+            pass
+        elif unit == 'um':
+            z = z * 1e-3
+        else:
+            raise(unknownUnitError)
+    except unknownUnitError:
+        print('Unknown unit: %s' % unit)
+        print('Known options are: m, nm, um')
+        sys.exit()
+
+    if (filename == ''):
+        f = sys.stdout
+    else:
+        f = open(filename, 'w')
+
+    for i in range(4, len(z) + 4):
+        f.write('%d\t %8.0f\n' % (i, z[i - 4]))
+    if not (filename == ''):
+        f.close()
+         
+        

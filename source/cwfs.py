@@ -13,7 +13,7 @@ import argparse
 from cwfsInstru import cwfsInstru
 from cwfsAlgo import cwfsAlgo
 from cwfsImage import cwfsImage
-from cwfsTools import outParam
+from cwfsTools import outParam, outZer4Up
 
 # main function
 
@@ -49,7 +49,7 @@ def main():
     parser.add_argument('-op', dest='outputParam', default='',
                         help='file name for dumping all parameters, \
                         default=no output')
-    parser.add_argument('-oz', dest='outputZer', default='',
+    parser.add_argument('-oz', dest='outputZerFile', default='',
                         help='file name for output Zernikes (in unit of nm), \
                         default=no output')
     parser.add_argument('-v', '--version', action='version',
@@ -78,8 +78,8 @@ def main():
     algo.runIt(inst, I1, I2, args.model)
 
     # output Zernikes 4 and up
-    if not(args.outputZer == '') or args.debugLevel >= 0:
-        algo.outZer4Up('nm', args.outputZer)
+    if not(args.outputZerFile == '') or args.debugLevel >= 0:
+        outZer4Up(algo.zer4UpNm,'nm', args.outputZerFile)
 
     # output parameters
     if not(args.outputParam == '') or args.debugLevel >= 1:
