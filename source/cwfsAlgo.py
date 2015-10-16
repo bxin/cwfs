@@ -42,39 +42,39 @@ class cwfsAlgo(object):
                     (not iscomment) and len(line) > 0):
                 if (line.startswith('PoissonSolver')):
                     self.PoissonSolver = line.split()[1]
-                if (line.startswith('Num_of_Zernikes')):
+                elif (line.startswith('Num_of_Zernikes')):
                     self.numTerms = int(line.split()[1])
-                if (line.startswith('ZTerms')):
+                elif (line.startswith('ZTerms')):
                     self.ZTerms = map(int, line.split()[1:])
-                if (line.startswith('Num_of_outer_itr')):
+                elif (line.startswith('Num_of_outer_itr')):
                     self.outerItr = int(line.split()[1])
-                if (line.startswith('Num_of_inner_itr')):
+                elif (line.startswith('Num_of_inner_itr')):
                     self.innerItr = int(line.split()[1])
-                if (line.startswith('Zernikes')):
+                elif (line.startswith('Zernikes')):
                     self.zobsR = int(line.split()[1])
-                if (line.startswith('Increase_resolution')):
+                elif (line.startswith('Increase_resolution')):
                     self.upReso = float(line.split()[1])
-                if (line.startswith('FFT_dimension')):
+                elif (line.startswith('FFT_dimension')):
                     self.padDim = float(line.split()[2])
-                if (line.startswith('Feedback_gain')):
+                elif (line.startswith('Feedback_gain')):
                     self.feedbackGain = float(line.split()[1])
-                if (line.startswith('Compensator_oversample')):
+                elif (line.startswith('Compensator_oversample')):
                     self.compOversample = float(line.split()[1])
-                if (line.startswith('Compensator_mode')):
+                elif (line.startswith('Compensator_mode')):
                     self.compMode = line.split()[1]
-                if (line.startswith('OffAxis_poly_order')):
+                elif (line.startswith('OffAxis_poly_order')):
                     self.offAxisPolyOrder = int(line.split()[1])
-                if (line.startswith('Boundary_thickness')):
+                elif (line.startswith('Boundary_thickness')):
                     self.boundaryT = int(line.split()[2])
-                if (line.startswith('Compensation_sequence')):
+                elif (line.startswith('Compensation_sequence')):
                     self.compSequence = np.loadtxt(
                         os.path.join('data/algo/', line.split()[1]))
-                if (line.startswith('Sumclip_sequence')):
+                elif (line.startswith('Sumclip_sequence')):
                     self.sumclipSequence = np.loadtxt(
                         os.path.join('data/algo/', line.split()[1]))
-                if (line.startswith('Image_formation')):
+                elif (line.startswith('Image_formation')):
                     self.imageFormation = line.split()[1]
-                if (line.startswith('Minimization')):
+                elif (line.startswith('Minimization')):
                     self.minimization = line.split()[1]
         fid.close()
 
@@ -367,11 +367,11 @@ class cwfsAlgo(object):
 
             if (self.zobsR > 0):
                 self.West = ZernikeAnnularEval(
-                    np.concatenate(([0, 0, 0], self.zc[3:]), axis=1),
+                    np.concatenate(([0, 0, 0], self.zc[3:])),
                     xSensor, ySensor, self.zobsR)
             else:
                 self.West = ZernikeEval(
-                    np.concatenate(([0, 0, 0], self.zc[3:]), axis=1),
+                    np.concatenate(([0, 0, 0], self.zc[3:])),
                     xSensor, ySensor)
 
     def itr0(self, inst, I1, I2, model):
@@ -510,12 +510,12 @@ be of same size.')
                     if (self.zobsR == 0):
                         self.Wconverge = ZernikeEval(
                             np.concatenate(
-                                ([0, 0, 0], self.zcomp[3:]), axis=1),
+                                ([0, 0, 0], self.zcomp[3:])),
                             inst.xoSensor, inst.yoSensor) + self.West
                     else:
                         self.Wconverge = ZernikeAnnularEval(
                             np.concatenate(
-                                ([0, 0, 0], self.zcomp[3:]), axis=1),
+                                ([0, 0, 0], self.zcomp[3:])),
                             inst.xoSensor, inst.yoSensor, self.zobsR) + self.West
                 else:
                     # once we run into caustic, stop here, results may be

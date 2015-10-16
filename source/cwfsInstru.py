@@ -24,18 +24,18 @@ class cwfsInstru(object):
                     (not iscomment) and len(line) > 0):
                 if (line.startswith('Obscuration')):
                     self.obscuration = float(line.split()[-1])
-                if (line.startswith('Focal_length')):
+                elif (line.startswith('Focal_length')):
                     self.focalLength = float(line.split()[-1])
-                if (line.startswith('Aperture_diameter')):
+                elif (line.startswith('Aperture_diameter')):
                     self.apertureDiameter = float(line.split()[-1])
-                if (line.startswith('Offset')):
+                elif (line.startswith('Offset')):
                     self.offset = float(line.split()[-1])
-                if (line.startswith('Pixel_size')):
+                elif (line.startswith('Pixel_size')):
                     self.pixelSize = float(line.split()[-1])
-                if (line.startswith('Mask_param')):
+                elif (line.startswith('Mask_param')):
                     self.maskParam = os.path.join(
                         'data/lsst/', line.split()[-1])
-                if (line.startswith('Marginal_fl')):
+                elif (line.startswith('Marginal_fl')):
                     self.marginalFL = float(line.split()[-1])
         fid.close()
         self.fno = self.focalLength / self.apertureDiameter
