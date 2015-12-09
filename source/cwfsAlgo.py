@@ -30,7 +30,9 @@ from cwfsErrors import unknownUnitError
 class cwfsAlgo(object):
 
     def __init__(self, algoFile, inst, debugLevel):
-        self.filename = os.path.join('data/algo/', (algoFile + '.algo'))
+        cwfsSrcDir=os.path.split(os.path.abspath(__file__))[0]
+        algoDir = '%s/../data/algo/'%(cwfsSrcDir)
+        self.filename = os.path.join(algoDir, (algoFile + '.algo'))
         fid = open(self.filename)
 
         iscomment = False
@@ -68,10 +70,10 @@ class cwfsAlgo(object):
                     self.boundaryT = int(line.split()[2])
                 elif (line.startswith('Compensation_sequence')):
                     self.compSequence = np.loadtxt(
-                        os.path.join('data/algo/', line.split()[1]))
+                        os.path.join(algoDir, line.split()[1]))
                 elif (line.startswith('Sumclip_sequence')):
                     self.sumclipSequence = np.loadtxt(
-                        os.path.join('data/algo/', line.split()[1]))
+                        os.path.join(algoDir, line.split()[1]))
                 elif (line.startswith('Image_formation')):
                     self.imageFormation = line.split()[1]
                 elif (line.startswith('Minimization')):

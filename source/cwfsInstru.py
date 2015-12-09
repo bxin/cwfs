@@ -13,7 +13,9 @@ import numpy as np
 class cwfsInstru(object):
 
     def __init__(self, instruFile, sensorSamples):
-        self.filename = os.path.join('data/lsst/', (instruFile + '.param'))
+        cwfsSrcDir=os.path.split(os.path.abspath(__file__))[0]
+        instDir = '%s/../data/%s/'%(cwfsSrcDir, instruFile)
+        self.filename = os.path.join(instDir, (instruFile + '.param'))
         fid = open(self.filename)
         iscomment = False
         for line in fid:

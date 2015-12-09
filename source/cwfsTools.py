@@ -6,9 +6,6 @@
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope
 
-# getCenterAndR() is partly based on the EF wavefront sensing software
-# by Laplacian Optics
-
 ##
 
 import sys
@@ -876,7 +873,7 @@ def ZernikeEval(Z, x, y):
         exit()
 
     if(len(Z) > 22):
-        print('ZernikeAnnularEval() is not implemented with >22 terms')
+        print('ZernikeEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
         Z[21] = 0
@@ -928,6 +925,13 @@ def ZernikeEval(Z, x, y):
 
 def ZernikeAnnularFit(S, x, y, numTerms, e):
 
+    """
+    S is the surface being fitted.
+    x and y are normalized coordinates between -1 and 1.
+    numTerms is the number of annular Zernike terms used in the fit.
+    e is the obscuration ratio of the annular Zernikes.
+    """
+    
     m1 = x.shape
     m2 = y.shape
     if (m1 != m2):

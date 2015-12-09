@@ -6,7 +6,11 @@
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope
 
-import sys
+# getCenterAndR() is partly based on the EF wavefront sensing software
+# by Laplacian Optics
+
+
+import sys, os
 
 import numpy as np
 import scipy.ndimage as ndimage
@@ -424,7 +428,9 @@ def getCenterAndR_ef(oriArray, readRand=1):
     # Matlab, read in these random numbers generated from Matlab
     if readRand:
         iRand = 0
-        myRand = np.loadtxt('data/algo/testRand.txt')
+        cwfsSrcDir=os.path.split(os.path.abspath(__file__))[0]
+        algoDir = '%s/../data/algo/'%(cwfsSrcDir)
+        myRand = np.loadtxt(os.path.join(algoDir,'testRand.txt'))
         myRand = np.tile(np.reshape(myRand, (1000, 1)), (10, 1))
 
     for istartPoint in range(len(startidx)):
