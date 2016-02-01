@@ -10,7 +10,8 @@
 # by Laplacian Optics
 
 
-import sys, os
+import sys
+import os
 
 import numpy as np
 import scipy.ndimage as ndimage
@@ -428,9 +429,9 @@ def getCenterAndR_ef(oriArray, readRand=1):
     # Matlab, read in these random numbers generated from Matlab
     if readRand:
         iRand = 0
-        cwfsSrcDir=os.path.split(os.path.abspath(__file__))[0]
-        algoDir = '%s/../data/algo/'%(cwfsSrcDir)
-        myRand = np.loadtxt(os.path.join(algoDir,'testRand.txt'))
+        cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
+        algoDir = '%s/../data/algo/' % (cwfsSrcDir)
+        myRand = np.loadtxt(os.path.join(algoDir, 'testRand.txt'))
         myRand = np.tile(np.reshape(myRand, (1000, 1)), (10, 1))
 
     for istartPoint in range(len(startidx)):
@@ -569,8 +570,12 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
         lutxp = lutx
         lutyp = luty
     elif (model == 'onAxis'):
-        myA = np.sqrt((inst.focalLength**2 - R**2) /
-                      (inst.focalLength**2 - lutr**2 * R**2))
+        myA2 = (inst.focalLength**2 - R**2) / \
+            (inst.focalLength**2 - lutr**2 * R**2)
+        idx = myA2 < 0
+        myA = myA2.copy()
+        myA[idx] = np.nan
+        myA[~idx] = np.sqrt(myA2[~idx])
         lutxp = algo.maskScalingFactor * myA * lutx
         lutyp = algo.maskScalingFactor * myA * luty
     elif (model == 'offAxis'):
