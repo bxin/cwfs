@@ -416,7 +416,7 @@ def getCenterAndR_ef(oriArray, readRand=1):
     pmin = array.min()
     pmax = array.max()
     if (pmin == pmax):
-        print('image has min=max=%f', pmin)
+        print('image has min=max=%f' % pmin)
     array1d = np.reshape(array, m * n, 1)
 
     phist, cen = np.histogram(array1d, bins=histogram_len)
