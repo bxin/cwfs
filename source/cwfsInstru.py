@@ -13,8 +13,8 @@ import numpy as np
 class cwfsInstru(object):
 
     def __init__(self, instruFile, sensorSamples):
-        cwfsSrcDir=os.path.split(os.path.abspath(__file__))[0]
-        instDir = '%s/../data/%s/'%(cwfsSrcDir, instruFile)
+        cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
+        instDir = '%s/../data/%s/' % (cwfsSrcDir, instruFile)
         self.filename = os.path.join(instDir, (instruFile + '.param'))
         fid = open(self.filename)
         iscomment = False

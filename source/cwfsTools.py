@@ -11,6 +11,8 @@
 import sys
 import numpy as np
 
+from cwfsErrors import unknownUnitError
+
 
 def padArray(inArray, dim):
     m, n = inArray.shape
@@ -924,14 +926,13 @@ def ZernikeEval(Z, x, y):
 
 
 def ZernikeAnnularFit(S, x, y, numTerms, e):
-
     """
     S is the surface being fitted.
     x and y are normalized coordinates between -1 and 1.
     numTerms is the number of annular Zernike terms used in the fit.
     e is the obscuration ratio of the annular Zernikes.
     """
-    
+
     m1 = x.shape
     m2 = y.shape
     if (m1 != m2):
@@ -1108,6 +1109,7 @@ def outParam(filename, algo, inst, I1, I2, model):
     if not (filename == ''):
         fout.close()
 
+
 def outZer4Up(z, unit, filename=''):
     try:
         if unit == 'm':
@@ -1132,5 +1134,3 @@ def outZer4Up(z, unit, filename=''):
         f.write('%d\t %8.0f\n' % (i, z[i - 4]))
     if not (filename == ''):
         f.close()
-         
-        

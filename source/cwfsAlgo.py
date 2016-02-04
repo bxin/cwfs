@@ -24,14 +24,14 @@ from cwfsTools import ZernikeEval
 from cwfsTools import ZernikeGrad
 
 from cwfsErrors import imageDiffSizeError
-from cwfsErrors import unknownUnitError
+# from cwfsErrors import unknownUnitError
 
 
 class cwfsAlgo(object):
 
     def __init__(self, algoFile, inst, debugLevel):
-        cwfsSrcDir=os.path.split(os.path.abspath(__file__))[0]
-        algoDir = '%s/../data/algo/'%(cwfsSrcDir)
+        cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
+        algoDir = '%s/../data/algo/' % (cwfsSrcDir)
         self.filename = os.path.join(algoDir, (algoFile + '.algo'))
         fid = open(self.filename)
 
@@ -518,7 +518,8 @@ be of same size.')
                         self.Wconverge = ZernikeAnnularEval(
                             np.concatenate(
                                 ([0, 0, 0], self.zcomp[3:])),
-                            inst.xoSensor, inst.yoSensor, self.zobsR) + self.West
+                            inst.xoSensor, inst.yoSensor, self.zobsR) + \
+                            self.West
                 else:
                     # once we run into caustic, stop here, results may be
                     # close to real aberration.
@@ -552,8 +553,8 @@ be of same size.')
 
             ztmp = self.converge[3:, :]
             ztmp = ztmp[:, np.prod(ztmp, axis=0) != 0]
-            self.zer4UpNm = ztmp[:, -1] * 1e9 #convert to nm
-            
+            self.zer4UpNm = ztmp[:, -1] * 1e9  # convert to nm
+
             if self.currentItr < int(self.outerItr):
                 self.currentItr = self.currentItr + 1
 
@@ -562,14 +563,14 @@ be of same size.')
                 print('itr = %d, z4-z%d' % (j, self.numTerms))
                 print(np.rint(tmp))
 
-            #self.Wconverge = self.Wconverge * self.pMask
-            
+            # self.Wconverge = self.Wconverge * self.pMask
+
     def nextItr(self, inst, I1, I2, model, nItr=1):
         i = 0
         while (i < nItr):
             i = i + 1
             self.singleItr(inst, I1, I2, model)
-            
+
     def runIt(self, inst, I1, I2, model):
         i = self.currentItr
         while (i <= int(self.outerItr)):

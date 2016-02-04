@@ -79,7 +79,7 @@ def main():
 
     # output Zernikes 4 and up
     if not(args.outputZerFile == '') or args.debugLevel >= 0:
-        outZer4Up(algo.zer4UpNm,'nm', args.outputZerFile)
+        outZer4Up(algo.zer4UpNm, 'nm', args.outputZerFile)
 
     # output parameters
     if not(args.outputParam == '') or args.debugLevel >= 1:

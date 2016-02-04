@@ -6,13 +6,18 @@
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope
 
-import matplotlib.pyplot as plt
+import sys
 
-def plotImage(image,title):
+import matplotlib.pyplot as plt
+from cwfsErrors import unknownUnitError
+
+
+def plotImage(image, title):
     plt.imshow(image, origin='lower')
     plt.colorbar()
     plt.title(title)
     plt.show()
+
 
 def plotZer(z, unit):
     try:
@@ -36,4 +41,3 @@ def plotZer(z, unit):
     plt.ylabel('Zernike coefficient (%s)' % unit)
     plt.grid()
     plt.show()
-
