@@ -321,8 +321,8 @@ class cwfsImage(object):
 
 def getOffAxisCorr_single(confFile, fldr):
     cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
-    algoDir = '%s/../data/algo/' % (cwfsSrcDir)
-    c = np.loadtxt(os.path.join(algoDir, confFile))
+    cwfsBaseDir = '%s/../' % cwfsSrcDir
+    c = np.loadtxt(os.path.join(cwfsBaseDir, confFile))
 
     ruler = np.sqrt(c[:, 0]**2 + c[:, 1]**2)
 #    print ruler, fldr, (ruler >= fldr).argmax(), (ruler >= fldr).argmin()
@@ -356,8 +356,8 @@ def interpMaskParam(fieldX, fieldY, maskParam):
     fldr = np.sqrt(fieldX**2 + fieldY**2)
 
     cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
-    algoDir = '%s/../data/algo/' % (cwfsSrcDir)
-    c = np.loadtxt(os.path.join(algoDir, maskParam))
+    cwfsBaseDir = '%s/../' % cwfsSrcDir
+    c = np.loadtxt(os.path.join(cwfsBaseDir, maskParam))
     ruler = np.sqrt(2 * c[:, 0]**2)
     step = ruler[1] - ruler[0]
 
