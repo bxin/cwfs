@@ -1,0 +1,8 @@
+#Dark Energy Camera on the Blanco telescope:
+#based on Zemax file from Aaron Roodman 1/7/2015
+Obscuration 				0.3396
+Focal_length (m)			11.71895
+Aperture_diameter (m)   		4.010
+Offset (m)				3.0e-3
+Pixel_size (m)				15e-6
+Marginal_fl (m)				10.9430
