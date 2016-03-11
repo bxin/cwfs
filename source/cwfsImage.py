@@ -16,6 +16,7 @@ import os
 import numpy as np
 import scipy.ndimage as ndimage
 import scipy.interpolate as interpolate
+from scipy import optimize
 from astropy.io import fits
 
 from cwfsTools import ZernikeAnnularGrad
@@ -36,16 +37,19 @@ class cwfsImage(object):
         fieldX = fieldXY[0]
         fieldY = fieldXY[1]
 
-        if (filename.endswith(".txt")):
-            self.image = np.loadtxt(filename)
-            # this assumes this txt file is in the format
-            # I[0,0]   I[0,1]
-            # I[1,0]   I[1,1]
-            self.image = self.image[::-1, :]
-        else:
-            IHDU = fits.open(filename)
-            self.image = IHDU[0].data
-            IHDU.close()
+        if isinstance(filename, str):
+            if (filename.endswith(".txt")):
+                self.image = np.loadtxt(filename)
+                # this assumes this txt file is in the format
+                # I[0,0]   I[0,1]
+                # I[1,0]   I[1,1]
+                self.image = self.image[::-1, :]
+            elif (filename.endswith(".fits")):
+                IHDU = fits.open(filename)
+                self.image = IHDU[0].data
+                IHDU.close()
+        else: #the filename is already the image array
+            self.image = filename
         self.fieldX = fieldX
         self.fieldY = fieldY
         self.fldr = np.sqrt(self.fieldX**2 + self.fieldY**2)
@@ -318,7 +322,57 @@ class cwfsImage(object):
         if (oversample > 1):
             self.downResolution(self, oversample, sm, sn)
 
+    def rmBkgd(self, outerR, debugLevel):
+        self.centerx, self.centery, tmp = getCenterAndR_ef(self.image)
+        xmax = self.image.shape[1]
+        ymax = self.image.shape[0]
+        yfull, xfull = np.mgrid[1:xmax+1,1:ymax+1]
+        c0 = [self.image[np.max((0, np.round(ymax/2-1.5*outerR))),
+                         np.max((0, np.round(xmax/2-1.5*outerR)))], 0, 0]
 
+        rfull = np.sqrt((xfull-self.centerx)**2 + (yfull-self.centery)**2)
+
+        idx = (rfull < 2.5*outerR) & (rfull > 1.5*outerR)
+
+        x = xfull[idx]
+        y = yfull[idx]
+        z = self.image[idx]
+        popt, pcov = optimize.curve_fit(linear2D, (x,y), z, p0=c0)
+
+        zfull = linear2D((xfull, yfull), *popt)
+        if debugLevel >= 1:
+            print(self.centerx, self.centery)
+
+        self.image =  self.image - zfull
+
+    def normalizeI(self, outerR, obsR):
+        xmax = self.image.shape[1]
+        ymax = self.image.shape[0]
+        yfull, xfull = np.mgrid[1:xmax+1,1:ymax+1]
+        
+        rfull = np.sqrt((xfull-self.centerx)**2 + (yfull-self.centery)**2)
+        idxsig = (rfull < 1.0*outerR) & (rfull > obsR*outerR)
+
+        self.image = self.image/sum(self.image[idxsig])
+                        
+    def getSNR(self, outerR, obsR):
+        xmax = self.image.shape[1]
+        ymax = self.image.shape[0]
+        yfull, xfull = np.mgrid[1:xmax+1,1:ymax+1]
+        
+        rfull = np.sqrt((xfull-self.centerx)**2 + (yfull-self.centery)**2)
+        idxsig = (rfull < 1.0*outerR) & (rfull > obsR*outerR)
+        idxbg = (rfull < 2.5*outerR) & (rfull > 1.5*outerR)
+
+        self.SNRsig = np.mean(self.image[idxsig])
+        self.SNRbg = np.std(self.image[idxbg]-np.mean(self.image[idxbg]))
+        self.SNR = self.SNRsig/self.SNRbg
+        
+def linear2D(xydata, c00, c10, c01):
+    (x, y) = xydata
+    f = c00+c10*x+c01*y
+    return f
+            
 def getOffAxisCorr_single(confFile, fldr):
     cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
     cwfsBaseDir = '%s/../' % cwfsSrcDir

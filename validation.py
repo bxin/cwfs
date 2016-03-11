@@ -42,7 +42,7 @@ x = range(4, znmax + 1)
 
 fig = plt.figure(figsize=(10, 10))
 
-for j in range(nTest):
+for j in range(0, nTest):
     intraFile = os.path.join(imgDir[j], intra[j])
     extraFile = os.path.join(imgDir[j], extra[j])
     I1 = cwfsImage(intraFile, fldxy[j, :], 'intra')
