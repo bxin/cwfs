@@ -307,7 +307,7 @@ class cwfsImage(object):
         # self.image < 0 will not be physical, remove that region
         # x(self.image<0) = NaN;
         self.caustic = 0
-        if (self.image.min() < 0):
+        if (np.any(self.image<0) and np.all(self.image0>=0)):
             print(
                 'WARNING: negative scale parameter, \
             image is within caustic, zcCol (in um)=\n')
