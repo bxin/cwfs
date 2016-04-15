@@ -367,6 +367,9 @@ class cwfsImage(object):
         self.SNRsig = np.mean(self.image[idxsig])
         self.SNRbg = np.std(self.image[idxbg]-np.mean(self.image[idxbg]))
         self.SNR = self.SNRsig/self.SNRbg
+        # if saturated, set SNR to negative
+        if (np.sum(abs(self.image - np.max(self.image))<1e-5)>4):# or np.max(self.image)>40000):
+            self.SNR = self.SNR * (-1)
         
 def linear2D(xydata, c00, c10, c01):
     (x, y) = xydata
