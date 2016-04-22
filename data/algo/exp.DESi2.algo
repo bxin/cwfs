@@ -12,7 +12,7 @@ ZTerms			4 5 6 7 8 9 10 11 14 15
 Num_of_outer_itr                        14
 
 #Zernikes -    0: standard, 1: same as system, others: use as obscuration ratio
-Zernikes      				1
+Zernikes      				0
 
 Increase_resolution			1
 Feedback_gain                           0.6

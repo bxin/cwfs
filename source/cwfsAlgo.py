@@ -47,7 +47,7 @@ class cwfsAlgo(object):
                 elif (line.startswith('Num_of_Zernikes')):
                     self.numTerms = int(line.split()[1])
                 elif (line.startswith('ZTerms')):
-                    self.ZTerms = map(int, line.split()[1:])
+                    self.ZTerms = [int(x) for x in line.split()[1:]] #map(int, line.split()[1:])
                 elif (line.startswith('Num_of_outer_itr')):
                     self.outerItr = int(line.split()[1])
                 elif (line.startswith('Num_of_inner_itr')):
@@ -552,8 +552,7 @@ be of same size.')
                     # Continuation may lead to disatrous results
                     self.converge[:, j] = self.converge[:, j - 1]
 
-            ztmp = self.converge[3:, :]
-            ztmp = ztmp[:, np.prod(ztmp, axis=0) != 0]
+            ztmp = self.converge[3:, :(j+1)]
             self.zer4UpNm = ztmp[:, -1] * 1e9  # convert to nm
 
             if self.currentItr < int(self.outerItr):
