@@ -492,6 +492,7 @@ be of same size.')
                     I2.compensate(inst, self, self.zcomp, 1, model)
                     if (I1.caustic == 1 or I2.caustic == 1):
                         self.caustic = 1
+                        return  #done with this singleItr()
                     I1, I2 = applyI1I2pMask(self, I1, I2)
                     self.solvePoissonEq(inst, I1, I2, j)
                     if self.PoissonSolver == 'fft':

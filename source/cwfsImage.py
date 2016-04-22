@@ -229,7 +229,10 @@ class cwfsImage(object):
 
         show_lutxyp = showProjection(
             lutxp, lutyp, inst.sensorFactor, projSamples, 0)
-
+        if (np.all(show_lutxyp<=0)):
+            self.caustic = 1
+            return
+        
         realcx, realcy, tmp = getCenterAndR_ef(self.image)
         show_lutxyp = padArray(show_lutxyp, projSamples + 20)
 
@@ -355,7 +358,7 @@ class cwfsImage(object):
 
         self.image = self.image/sum(self.image[idxsig])
                         
-    def getSNR(self, outerR, obsR):
+    def getSNR(self, outerR, obsR, saturation=1e10):
         xmax = self.image.shape[1]
         ymax = self.image.shape[0]
         yfull, xfull = np.mgrid[1:xmax+1,1:ymax+1]
@@ -368,8 +371,10 @@ class cwfsImage(object):
         self.SNRbg = np.std(self.image[idxbg]-np.mean(self.image[idxbg]))
         self.SNR = self.SNRsig/self.SNRbg
         # if saturated, set SNR to negative
-        if (np.sum(abs(self.image - np.max(self.image))<1e-5)>4):# or np.max(self.image)>40000):
+        # if (np.sum(abs(self.image - np.max(self.image))<1e-5)>4):# or np.max(self.image)>40000):
+        if np.any(self.image>saturation):
             self.SNR = self.SNR * (-1)
+            print('Saturation detected: %s\n'% self.filename)
         
 def linear2D(xydata, c00, c10, c01):
     (x, y) = xydata

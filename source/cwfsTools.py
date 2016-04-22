@@ -43,7 +43,7 @@ def ZernikeAnnularGrad(Z, x, y, e, type):
         print('ZernikeAnnularEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z[21] = 0
+        Z = np.hstack((Z, np.zeros(22-len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -372,7 +372,7 @@ def ZernikeGrad(Z, x, y, atype):
         print('ZernikeGrad() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z[21] = 0
+        Z = np.hstack((Z, np.zeros(22-len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -449,7 +449,7 @@ def ZernikeJacobian(Z, x, y, atype):
         print('ZernikeGrad() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z[21] = 0
+        Z = np.hstack((Z, np.zeros(22-len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -535,7 +535,7 @@ def ZernikeAnnularJacobian(Z, x, y, e, atype):
         print('ZernikeAnnularEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z[21] = 0
+        Z = np.hstack((Z, np.zeros(22-len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -878,7 +878,7 @@ def ZernikeEval(Z, x, y):
         print('ZernikeEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z[21] = 0
+        Z = np.hstack((Z, np.zeros(22-len(Z))))
 
     r2 = x * x + y * y
     r = np.sqrt(r2)
@@ -973,7 +973,7 @@ def ZernikeAnnularEval(Z, x, y, e):
         print('ZernikeAnnularEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z[21] = 0
+        Z = np.hstack((Z, np.zeros(22-len(Z))))
 
     r2 = x * x + y * y
     r = np.sqrt(r2)
