@@ -47,7 +47,7 @@ class cwfsAlgo(object):
                 elif (line.startswith('Num_of_Zernikes')):
                     self.numTerms = int(line.split()[1])
                 elif (line.startswith('ZTerms')):
-                    self.ZTerms = [int(x) for x in line.split()[1:]] #map(int, line.split()[1:])
+                    self.ZTerms = np.hstack(([1, 2, 3], [int(x) for x in line.split()[1:]]))
                 elif (line.startswith('Num_of_outer_itr')):
                     self.outerItr = int(line.split()[1])
                 elif (line.startswith('Num_of_inner_itr')):
@@ -491,6 +491,7 @@ be of same size.')
                     I1.compensate(inst, self, self.zcomp, 1, model)
                     I2.compensate(inst, self, self.zcomp, 1, model)
                     if (I1.caustic == 1 or I2.caustic == 1):
+                        self.converge[:, j] = self.converge[:, j - 1]
                         self.caustic = 1
                         return  #done with this singleItr()
                     I1, I2 = applyI1I2pMask(self, I1, I2)
@@ -552,8 +553,7 @@ be of same size.')
                     # Continuation may lead to disatrous results
                     self.converge[:, j] = self.converge[:, j - 1]
 
-            ztmp = self.converge[3:, :(j+1)]
-            self.zer4UpNm = ztmp[:, -1] * 1e9  # convert to nm
+            self.zer4UpNm = self.converge[3:, j] * 1e9  # convert to nm
 
             if self.currentItr < int(self.outerItr):
                 self.currentItr = self.currentItr + 1
