@@ -114,10 +114,7 @@ class cwfsAlgo(object):
             pass
 
         # mask scaling factor (for fast beam)
-        try:
-            self.maskScalingFactor = inst.focalLength / inst.marginalFL
-        except AttributeError:
-            self.maskScalingFactor = 1
+        self.maskScalingFactor = inst.focalLength / inst.marginalFL
 
         self.caustic = 0
         self.converge = np.zeros((self.numTerms, self.outerItr + 1))

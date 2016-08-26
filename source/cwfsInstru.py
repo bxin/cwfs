@@ -37,10 +37,9 @@ class cwfsInstru(object):
                 elif (line.startswith('Mask_param')):
                     self.maskParam = os.path.join(
                         'data/lsst/', line.split()[-1])
-                elif (line.startswith('Marginal_fl')):
-                    self.marginalFL = float(line.split()[-1])
         fid.close()
         self.fno = self.focalLength / self.apertureDiameter
+        self.marginalFL = np.sqrt(self.focalLength**2 - (self.apertureDiameter/2)**2);
 
         # the below need to be instrument parameters, b/c it is not specific
         # for I1 or I2
