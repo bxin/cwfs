@@ -14,8 +14,8 @@ class cwfsInstru(object):
 
     def __init__(self, instruFile, sensorSamples):
         cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
-        instDir = '%s/../data/%s/' % (cwfsSrcDir, instruFile)
-        self.filename = os.path.join(instDir, (instruFile + '.param'))
+        self.instDir = '%s/../data/%s/' % (cwfsSrcDir, instruFile)
+        self.filename = os.path.join(self.instDir, (instruFile + '.param'))
         fid = open(self.filename)
         iscomment = False
         for line in fid:
@@ -34,12 +34,10 @@ class cwfsInstru(object):
                     self.offset = float(line.split()[-1])
                 elif (line.startswith('Pixel_size')):
                     self.pixelSize = float(line.split()[-1])
-                elif (line.startswith('Mask_param')):
-                    self.maskParam = os.path.join(
-                        'data/lsst/', line.split()[-1])
         fid.close()
         self.fno = self.focalLength / self.apertureDiameter
-        self.marginalFL = np.sqrt(self.focalLength**2 - (self.apertureDiameter/2)**2);
+        self.marginalFL = np.sqrt(self.focalLength**2 - (self.apertureDiameter/2)**2)
+        self.maskParam = os.path.join(self.instDir, 'mask_migrate.txt')
 
         # the below need to be instrument parameters, b/c it is not specific
         # for I1 or I2

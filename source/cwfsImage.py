@@ -130,16 +130,16 @@ class cwfsImage(object):
             # non-padded mask corresponding to aperture
             self.cMask = self.cMask * cMaskii
 
-    def getOffAxisCorr(self, order):
-        self.offAxis_coeff = np.zeros((4, (order + 1) * (order + 2) / 2))
+    def getOffAxisCorr(instDir, self, order):
+        self.offAxis_coeff = np.zeros((4, (order + 1) * (order + 2) / 2))            
         self.offAxis_coeff[0, :] = getOffAxisCorr_single(
-            'data/lsst/offAxis_cxin_poly%d.txt' % (order), self.fldr)
+            os.path.join(instDir, 'offAxis_cxin_poly%d.txt' % (order)), self.fldr)
         self.offAxis_coeff[1, :] = getOffAxisCorr_single(
-            'data/lsst/offAxis_cyin_poly%d.txt' % (order), self.fldr)
+            os.path.join(instDir, 'offAxis_cyin_poly%d.txt' % (order)), self.fldr)
         self.offAxis_coeff[2, :] = getOffAxisCorr_single(
-            'data/lsst/offAxis_cxex_poly%d.txt' % (order), self.fldr)
+            os.path.join(instDir, 'offAxis_cxex_poly%d.txt' % (order)), self.fldr)
         self.offAxis_coeff[3, :] = getOffAxisCorr_single(
-            'data/lsst/offAxis_cyex_poly%d.txt' % (order), self.fldr)
+            os.path.join(instDir, 'offAxis_cyex_poly%d.txt' % (order)), self.fldr)
 
     def upResolution(self, oversample, lm, ln):
 

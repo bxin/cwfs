@@ -410,8 +410,8 @@ be of same size.')
 
         # load offAxis correction coefficients
         if model == 'offAxis':
-            I1.getOffAxisCorr(self.offAxisPolyOrder)
-            I2.getOffAxisCorr(self.offAxisPolyOrder)
+            I1.getOffAxisCorr(inst.instDir, self.offAxisPolyOrder)
+            I2.getOffAxisCorr(inst.instDir, self.offAxisPolyOrder)
 
         # cocenter the images
         I1.imageCoCenter(inst, self)
