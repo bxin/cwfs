@@ -580,7 +580,7 @@ be of same size.')
     def reset(self, I1, I2):
         self.currentItr = 0
         if self.debugLevel >= 3:
-            print('resetting images')
+            print('resetting images: I1 and I2')
 
         try:
             I1.image = I1.image0.copy()

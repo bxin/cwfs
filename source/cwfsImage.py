@@ -130,15 +130,15 @@ class cwfsImage(object):
             # non-padded mask corresponding to aperture
             self.cMask = self.cMask * cMaskii
 
-    def getOffAxisCorr(instDir, self, order):
+    def getOffAxisCorr(self, instDir, order):
         self.offAxis_coeff = np.zeros((4, (order + 1) * (order + 2) / 2))            
-        self.offAxis_coeff[0, :] = getOffAxisCorr_single(
+        self.offAxis_coeff[0, :], self.offAxisOffset = getOffAxisCorr_single(
             os.path.join(instDir, 'offAxis_cxin_poly%d.txt' % (order)), self.fldr)
-        self.offAxis_coeff[1, :] = getOffAxisCorr_single(
+        self.offAxis_coeff[1, :], _ = getOffAxisCorr_single(
             os.path.join(instDir, 'offAxis_cyin_poly%d.txt' % (order)), self.fldr)
-        self.offAxis_coeff[2, :] = getOffAxisCorr_single(
+        self.offAxis_coeff[2, :], _ = getOffAxisCorr_single(
             os.path.join(instDir, 'offAxis_cxex_poly%d.txt' % (order)), self.fldr)
-        self.offAxis_coeff[3, :] = getOffAxisCorr_single(
+        self.offAxis_coeff[3, :], _ = getOffAxisCorr_single(
             os.path.join(instDir, 'offAxis_cyex_poly%d.txt' % (order)), self.fldr)
 
     def upResolution(self, oversample, lm, ln):
@@ -384,8 +384,10 @@ def linear2D(xydata, c00, c10, c01):
 def getOffAxisCorr_single(confFile, fldr):
     cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
     cwfsBaseDir = '%s/../' % cwfsSrcDir
-    c = np.loadtxt(os.path.join(cwfsBaseDir, confFile))
-
+    cdata = np.loadtxt(os.path.join(cwfsBaseDir, confFile))
+    c = cdata[:, 1:]
+    offset = cdata[0,0]
+    
     ruler = np.sqrt(c[:, 0]**2 + c[:, 1]**2)
 #    print ruler, fldr, (ruler >= fldr).argmax(), (ruler >= fldr).argmin()
     step = ruler[1] - ruler[0]
@@ -411,7 +413,7 @@ def getOffAxisCorr_single(confFile, fldr):
 #    print c[p1,2:], c[p2,2:], w1,p1, w2, p2
     corr_coeff = np.dot(w1, c[p1, 2:]) + np.dot(w2, c[p2, 2:])
 
-    return corr_coeff
+    return corr_coeff, offset
 
 
 def interpMaskParam(fieldX, fieldY, maskParam):
@@ -647,16 +649,17 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
     elif (model == 'offAxis'):
         # nothing is hard-coded here: (1e-3) is because the
         # offAxis correction param files are based on offset=1.0mm
+        tt = Im.offAxisOffset
         if (Im.type == 'intra'):
             cx = (Im.offAxis_coeff[0, :] - Im.offAxis_coeff[2, :]) * \
-                (1e-3 + inst.offset) / 2e-3 + Im.offAxis_coeff[2, :]
+                (tt + inst.offset) / (2*tt) + Im.offAxis_coeff[2, :]
             cy = (Im.offAxis_coeff[1, :] - Im.offAxis_coeff[3, :]) * \
-                (1e-3 + inst.offset) / 2e-3 + Im.offAxis_coeff[3, :]
+                (tt + inst.offset) / (2*tt) + Im.offAxis_coeff[3, :]
         elif (Im.type == 'extra'):
             cx = (Im.offAxis_coeff[0, :] - Im.offAxis_coeff[2, :]) * \
-                (1e-3 - inst.offset) / 2e-3 + Im.offAxis_coeff[2, :]
+                (tt - inst.offset) / (2*tt) + Im.offAxis_coeff[2, :]
             cy = (Im.offAxis_coeff[1, :] - Im.offAxis_coeff[3, :]) * \
-                (1e-3 - inst.offset) / 2e-3 + Im.offAxis_coeff[3, :]
+                (tt - inst.offset) / (2*tt) + Im.offAxis_coeff[3, :]
             cx = -cx  # this will be inverted back by typesign later on.
             # we do the inversion here to make the (x,y)->(x',y') equations has
             # the same form as the paraxial case.
