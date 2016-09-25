@@ -402,8 +402,8 @@ be of same size.')
             sys.exit()
 
         # pupil mask, computational mask, and their parameters
-        I1.makeMaskList(inst)
-        I2.makeMaskList(inst)
+        I1.makeMaskList(inst, model)
+        I2.makeMaskList(inst, model)
         I1.makeMask(inst, self.boundaryT, 1)
         I2.makeMask(inst, self.boundaryT, 1)
         self.makeMasterMask(I1, I2)

@@ -52,7 +52,8 @@ class cwfsImage(object):
             self.image = filename
         self.fieldX = fieldX
         self.fieldY = fieldY
-        self.fldr = np.sqrt(self.fieldX**2 + self.fieldY**2)
+        # we will need self.fldr to be on denominator 
+        self.fldr = np.max((np.sqrt(self.fieldX**2 + self.fieldY**2), 1e-8))
         self.type = type
         self.sizeinPix = self.image.shape[0]
         self.filename = filename
@@ -75,8 +76,8 @@ class cwfsImage(object):
             sys.exit()
 
     # if we pass inst.maskParam, a try: catch: is needed in cwfs.py
-    def makeMaskList(self, inst):
-        if (self.fieldX == 0 and self.fieldY == 0):
+    def makeMaskList(self, inst, model):
+        if (model == 'paraxial' or model == 'onAxis'):
             if inst.obscuration == 0:
                 self.masklist = np.array([0, 0, 1, 1])
             else:
@@ -189,12 +190,8 @@ class cwfsImage(object):
         if (self.fldr > 1.75):
             radialShift = 0
 
-        if self.fldr != 0:
-            I1c = self.fieldX / self.fldr
-            I1s = self.fieldY / self.fldr
-        else:
-            I1c = 0
-            I1s = 0
+        I1c = self.fieldX / self.fldr
+        I1s = self.fieldY / self.fldr
 
         stampCenterx1 = stampCenterx1 + radialShift * I1c
         stampCentery1 = stampCentery1 + radialShift * I1s
@@ -395,7 +392,7 @@ def getOffAxisCorr_single(confFile, fldr):
     p2 = (ruler >= fldr)
 #    print "FINE",p2, p2.shape
     if (np.count_nonzero(p2) == 0):  # fldr is too large to be in range
-        p2 = c.shape()[0]
+        p2 = c.shape[0]-1
         p1 = p2
         w1 = 1
         w2 = 0
@@ -427,7 +424,7 @@ def interpMaskParam(fieldX, fieldY, maskParam):
 
     p2 = (ruler >= fldr)
     if (np.count_nonzero(p2) == 0):  # fldr is too large to be in range
-        p2 = c.shape()[0]
+        p2 = c.shape[0]
         p1 = p2
         w1 = 1
         w2 = 0
@@ -453,7 +450,8 @@ def interpMaskParam(fieldX, fieldY, maskParam):
 
 def rotateMaskParam(ca, cb, fieldX, fieldY):
 
-    fldr = np.sqrt(fieldX**2 + fieldY**2)
+    #so that fldr is never zero (see next line)
+    fldr = np.max((np.sqrt(fieldX**2 + fieldY**2), 1e-8))
     c = fieldX / fldr
     s = fieldY / fldr
 
@@ -632,7 +630,7 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
         lutx, luty = createPupilGrid(
             lutx, luty, onepixel,
             Im.maskCa, Im.maskCb, Im.maskRa, Im.maskRb,
-            Im.fieldX, Im.fieldY)
+            Im.fieldX, Im.fieldY) 
 
     if (model == 'paraxial'):
         lutxp = lutx
