@@ -15,24 +15,13 @@ import sys
 import numpy as np
 import scipy.ndimage as ndimage
 
-from cwfsTools import padArray
-from cwfsTools import extractArray
-from cwfsTools import ZernikeMaskedFit
-from cwfsTools import ZernikeAnnularEval
-from cwfsTools import ZernikeAnnularGrad
-from cwfsTools import ZernikeEval
-from cwfsTools import ZernikeGrad
-
-from cwfsErrors import imageDiffSizeError
-# from cwfsErrors import unknownUnitError
-
+from . import tools
 
 class cwfsAlgo(object):
 
     def __init__(self, algoFile, inst, debugLevel):
-        cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
-        algoDir = '%s/../data/algo/' % (cwfsSrcDir)
-        self.filename = os.path.join(algoDir, (algoFile + '.algo'))
+        algoDir = os.path.join(tools.getDataDir(), "algo")
+        self.filename = os.path.join(algoDir, "%s.algo" % algoFile)
         fid = open(self.filename)
 
         iscomment = False
@@ -126,8 +115,8 @@ class cwfsAlgo(object):
         self.cMask = I1.cMask * I2.cMask
         try:
             if (self.PoissonSolver == 'fft'):
-                self.pMaskPad = padArray(self.pMask, self.padDim)
-                self.cMaskPad = padArray(self.cMask, self.padDim)
+                self.pMaskPad = tools.padArray(self.pMask, self.padDim)
+                self.cMaskPad = tools.padArray(self.cMask, self.padDim)
         except AttributeError:
             pass
 
@@ -168,7 +157,7 @@ class cwfsAlgo(object):
         c0 = inst.focalLength * (inst.focalLength - inst.offset) / inst.offset
         self.S = self.S / c0
 
-        self.S = padArray(self.S, self.padDim) * self.cMaskPad
+        self.S = tools.padArray(self.S, self.padDim) * self.cMaskPad
 
     def getdIandI(self, I1, I2):
 
@@ -252,7 +241,7 @@ class cwfsAlgo(object):
                 # *************************************************************
                 # BOX 5 - Wavefront estimate
                 # (includes zeroing offset & masking to the aperture size)
-                West = extractArray(W, inst.sensorSamples)
+                West = tools.extractArray(W, inst.sensorSamples)
                 # print "WEST", West.shape, W.shape
 
                 offset = West[self.pMask == 1].mean()
@@ -261,7 +250,7 @@ class cwfsAlgo(object):
 
                 if (self.compMode == 'zer'):
 
-                    zc[:, jj] = ZernikeMaskedFit(
+                    zc[:, jj] = tools.ZernikeMaskedFit(
                         West, inst.xSensor, inst.ySensor,
                         self.numTerms, self.pMask, self.zobsR)
 
@@ -295,7 +284,7 @@ class cwfsAlgo(object):
                 Wyy[1:-1, :] = (Wt[0:-2, :] - 2 * Wt[1:-1, :] + Wt[2:, :]) /\
                     aperturePixelSize**2
                 del2W = Wxx + Wyy
-                Sest = padArray(del2W, self.padDim)
+                Sest = tools.padArray(del2W, self.padDim)
 
                 # ********************************************************
                 # BOX 3 - Put signal back inside boundary,
@@ -329,19 +318,19 @@ class cwfsAlgo(object):
                 # Using m.pMask, the two should give same results.
                 if (self.zobsR > 0):
                     F[i] = np.sum(np.sum(
-                        self.dI * ZernikeAnnularEval(
+                        self.dI * tools.ZernikeAnnularEval(
                             zcCol, xSensor, ySensor,
                             self.zobsR))) * aperturePixelSize**2
-                    dZidx[i, :, :] = ZernikeAnnularGrad(
+                    dZidx[i, :, :] = tools.ZernikeAnnularGrad(
                         zcCol, xSensor, ySensor, self.zobsR, 'dx')
-                    dZidy[i, :, :] = ZernikeAnnularGrad(
+                    dZidy[i, :, :] = tools.ZernikeAnnularGrad(
                         zcCol, xSensor, ySensor, self.zobsR, 'dy')
                 else:
                     F[i] = np.sum(np.sum(
-                        self.dI * ZernikeEval(
+                        self.dI * tools.ZernikeEval(
                             zcCol, xSensor, ySensor))) * aperturePixelSize**2
-                    dZidx[i, :, :] = ZernikeGrad(zcCol, xSensor, ySensor, 'dx')
-                    dZidy[i, :, :] = ZernikeGrad(zcCol, xSensor, ySensor, 'dy')
+                    dZidx[i, :, :] = tools.ZernikeGrad(zcCol, xSensor, ySensor, 'dx')
+                    dZidy[i, :, :] = tools.ZernikeGrad(zcCol, xSensor, ySensor, 'dy')
                 zcCol[i] = 0
 
             self.Mij = np.zeros((self.numTerms, self.numTerms))
@@ -365,11 +354,11 @@ class cwfsAlgo(object):
             self.zc[idx] = zc_tmp
 
             if (self.zobsR > 0):
-                self.West = ZernikeAnnularEval(
+                self.West = tools.ZernikeAnnularEval(
                     np.concatenate(([0, 0, 0], self.zc[3:])),
                     xSensor, ySensor, self.zobsR)
             else:
-                self.West = ZernikeEval(
+                self.West = tools.ZernikeEval(
                     np.concatenate(([0, 0, 0], self.zc[3:])),
                     xSensor, ySensor)
 
@@ -389,10 +378,7 @@ class cwfsAlgo(object):
         except AttributeError:
             pass
 
-        try:
-            if I1.image.shape[0] != I2.image.shape[0]:
-                raise(imageDiffSizeError)
-        except imageDiffSizeError:
+        if I1.image.shape[0] != I2.image.shape[0]:
             print('%s image size = (%d, %d) ' % (
                 I1.type, I1.image.shape[0], I1.image.shape[1]))
             print('%s image size = (%d, %d) ' % (
@@ -451,7 +437,7 @@ be of same size.')
             I1, I2 = applyI1I2pMask(self, I1, I2)
             self.solvePoissonEq(inst, I1, I2, 0)
             self.Wconverge = self.West
-            self.converge[:, 0] = ZernikeMaskedFit(
+            self.converge[:, 0] = tools.ZernikeMaskedFit(
                 self.Wconverge, inst.xSensor, inst.ySensor,
                 self.numTerms, self.pMask, self.zobsR)
 
@@ -509,12 +495,12 @@ be of same size.')
                     # self.converge(:,end), (or self.Wconverge, in 2D form)
                     # self.Wres is only available for the fft algorithm.
                     if (self.zobsR == 0):
-                        self.Wconverge = ZernikeEval(
+                        self.Wconverge = tools.ZernikeEval(
                             np.concatenate(
                                 ([0, 0, 0], self.zcomp[3:])),
                             inst.xoSensor, inst.yoSensor) + self.West
                     else:
-                        self.Wconverge = ZernikeAnnularEval(
+                        self.Wconverge = tools.ZernikeAnnularEval(
                             np.concatenate(
                                 ([0, 0, 0], self.zcomp[3:])),
                             inst.xoSensor, inst.yoSensor, self.zobsR) + \
@@ -541,7 +527,7 @@ be of same size.')
                     self.solvePoissonEq(inst, I1, I2, j)
 
                     self.Wconverge = self.wcomp + self.West
-                    self.converge[:, j - 1] = ZernikeMaskedFit(
+                    self.converge[:, j - 1] = tools.ZernikeMaskedFit(
                         self.Wconverge, inst.xSensor, inst.ySensor,
                         self.numTerms, self.pMask, self.zobsR)
                 else:

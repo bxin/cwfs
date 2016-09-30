@@ -9,8 +9,7 @@
 import sys
 
 import matplotlib.pyplot as plt
-from cwfsErrors import unknownUnitError
-
+from . import errors
 
 def plotImage(image, title):
     plt.imshow(image, origin='lower')
@@ -28,8 +27,8 @@ def plotZer(z, unit):
         elif unit == 'um':
             z = z * 1e-3
         else:
-            raise(unknownUnitError)
-    except unknownUnitError:
+            raise(errors.unknownUnitError)
+    except errors.unknownUnitError:
         print('Unknown unit: %s' % unit)
         print('Known options are: m, nm, um')
         sys.exit()

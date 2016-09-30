@@ -7,7 +7,7 @@
 # @       Large Synoptic Survey Telescope
 
 ##
-
+import os
 import sys
 import numpy as np
 
@@ -709,8 +709,16 @@ def ZernikeAnnularJacobian(Z, x, y, e, atype):
 
     return j
 
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#
+# Any function you want to use by name outside this file must be put into
+# the initialisation dict __funcTable, which is set after all the functions
+# are defined.
+#
+# They are retrieved using func = getFunction(name), e.g.
+#     polyFunc = tools.getFunction('poly%d_2D'  % algo.offAxisPolyOrder)
 
-def poly10_2D(c, data, y=None):
+def _poly10_2D(c, data, y=None):
 
     if (y is None):
         x = data[0, :]
@@ -744,7 +752,7 @@ def poly10_2D(c, data, y=None):
     return F
 
 
-def poly10Grad(c, x, y, atype):
+def _poly10Grad(c, x, y, atype):
 
     if (atype == 'dx'):
         out = c[1] + c[3] * 2 * x + c[4] * y + c[6] * 3 * x**2 + \
@@ -799,6 +807,21 @@ def poly10Grad(c, x, y, atype):
             c[63] * x**2 * 8 * y**7 + c[64] * x * 9 * y**8 + c[65] * 10 * y**9
 
     return out
+
+try:
+    __funcTable
+except NameError:
+    __funcTable = dict(poly10_2D  = _poly10_2D,
+                       poly10Grad = _poly10Grad,
+                       )
+
+def getFunction(name):
+    if name in __funcTable:
+        return __funcTable[name]
+
+    raise RuntimeError("Unknown function name in lsst.cwfs.tools: \"%s\"" % name)
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 def extractArray(inArray, dim):
@@ -1134,3 +1157,13 @@ def outZer4Up(z, unit, filename=''):
         f.write('%d\t %8.0f\n' % (i, z[i - 4]))
     if not (filename == ''):
         f.close()
+
+
+def getDataDir():
+    """Return the directory where data is to be found
+
+    N.b. this needs to be rethought, but it's OK for now"""
+
+    cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
+    return  os.path.join(cwfsSrcDir, '..', '..', '..', 'data')
+

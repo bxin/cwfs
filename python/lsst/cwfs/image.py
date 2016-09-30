@@ -19,9 +19,8 @@ import scipy.interpolate as interpolate
 from scipy import optimize
 from astropy.io import fits
 
-from tools import ZernikeAnnularGrad, ZernikeGrad, ZernikeAnnularJacobian, ZernikeJacobian, \
-    padArray, extractArray
-from errors import nonSquareImageError, oddNumPixError
+from . import tools
+from tools import ZernikeAnnularGrad, ZernikeGrad, ZernikeAnnularJacobian, ZernikeJacobian
 
 class cwfsImage(object):
 
@@ -50,18 +49,14 @@ class cwfsImage(object):
         self.type = type
         self.sizeinPix = self.image.shape[0]
         self.filename = filename
-        try:
-            if self.image.shape[0] != self.image.shape[1]:
-                raise(nonSquareImageError)
-            if self.image.shape[0] % 2 == 1:
-                raise(oddNumPixError)
-        except nonSquareImageError:
+
+        if self.image.shape[0] != self.image.shape[1]:
             print('%s image filename = %s ' % (type, filename))
             print('%s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
             print('Error: Only square image stamps are accepted.')
             sys.exit()
-        except oddNumPixError:
+        elif self.image.shape[0] % 2 == 1:
             print('%s image filename = %s ' % (type, filename))
             print('%s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
@@ -224,7 +219,7 @@ class cwfsImage(object):
             return
         
         realcx, realcy, tmp = getCenterAndR_ef(self.image)
-        show_lutxyp = padArray(show_lutxyp, projSamples + 20)
+        show_lutxyp = tools.padArray(show_lutxyp, projSamples + 20)
 
         struct0 = ndimage.generate_binary_structure(2, 1)
         struct = ndimage.iterate_structure(struct0, 4)
@@ -235,7 +230,7 @@ class cwfsImage(object):
             show_lutxyp, structure=struct)
         show_lutxyp = ndimage.morphology.binary_erosion(
             show_lutxyp, structure=struct)
-        show_lutxyp = extractArray(show_lutxyp, projSamples)
+        show_lutxyp = tools.extractArray(show_lutxyp, projSamples)
 
         projcx, projcy, tmp = getCenterAndR_ef(show_lutxyp.astype(float))
         projcx = projcx / (oversample)
@@ -489,7 +484,7 @@ def getCenterAndR_ef(oriArray, readRand=1):
     if readRand:
         iRand = 0
         cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
-        algoDir = '%s/../data/algo/' % (cwfsSrcDir)
+        algoDir = os.path.join(tools.getDataDir(), "algo")
         myRand = np.loadtxt(os.path.join(algoDir, 'testRand.txt'))
         myRand = np.tile(np.reshape(myRand, (1000, 1)), (10, 1))
 
@@ -595,11 +590,8 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
     elif (Im.type == 'extra'):
         myC = inst.focalLength * (inst.focalLength / inst.offset + 1) / R**2
 
-    module = __import__('cwfsTools', 'poly%d_2D' % algo.offAxisPolyOrder)
-    polyFunc = getattr(module, 'poly%d_2D' % algo.offAxisPolyOrder)
-
-    module = __import__('cwfsTools', 'poly%dGrad' % algo.offAxisPolyOrder)
-    polyGradFunc = getattr(module, 'poly%dGrad' % algo.offAxisPolyOrder)
+    polyFunc     = tools.getFunction('poly%d_2D'  % algo.offAxisPolyOrder)
+    polyGradFunc = tools.getFunction('poly%dGrad' % algo.offAxisPolyOrder)
 
     lutr = np.sqrt(lutx**2 + luty**2)
     # 1 pixel larger than projected pupil. No need to be EF-like, anything
