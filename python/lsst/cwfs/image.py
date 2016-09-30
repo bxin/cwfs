@@ -19,16 +19,9 @@ import scipy.interpolate as interpolate
 from scipy import optimize
 from astropy.io import fits
 
-from cwfsTools import ZernikeAnnularGrad
-from cwfsTools import ZernikeGrad
-from cwfsTools import ZernikeAnnularJacobian
-from cwfsTools import ZernikeJacobian
-from cwfsTools import padArray
-from cwfsTools import extractArray
-
-from cwfsErrors import nonSquareImageError
-from cwfsErrors import oddNumPixError
-
+from tools import ZernikeAnnularGrad, ZernikeGrad, ZernikeAnnularJacobian, ZernikeJacobian, \
+    padArray, extractArray
+from errors import nonSquareImageError, oddNumPixError
 
 class cwfsImage(object):
 

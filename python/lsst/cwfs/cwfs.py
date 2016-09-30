@@ -10,10 +10,10 @@
 import os
 import argparse
 
-from cwfsInstru import cwfsInstru
-from cwfsAlgo import cwfsAlgo
-from cwfsImage import cwfsImage
-from cwfsTools import outParam, outZer4Up
+from lsst.cwfs.instru import cwfsInstru
+from lsst.cwfs.algo import cwfsAlgo
+from lsst.cwfs.image import cwfsImage
+from lsst.cwfs.tools import outParam, outZer4Up
 
 # main function
 

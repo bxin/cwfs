@@ -9,9 +9,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from cwfsInstru import cwfsInstru
-from cwfsAlgo import cwfsAlgo
-from cwfsImage import cwfsImage
+from lsst.cwfs.instru import cwfsInstru
+from lsst.cwfs.algo import cwfsAlgo
+from lsst.cwfs.image import cwfsImage
 
 imgDir = ['../testImages/F1.23_1mm_v61',
           '../testImages/LSST_C_SN26', '../testImages/LSST_C_SN26',

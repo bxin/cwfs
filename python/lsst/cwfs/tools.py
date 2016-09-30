@@ -11,7 +11,7 @@
 import sys
 import numpy as np
 
-from cwfsErrors import unknownUnitError
+from errors import unknownUnitError
 
 
 def padArray(inArray, dim):
