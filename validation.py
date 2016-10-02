@@ -9,8 +9,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from lsst.cwfs.instru import Instrument
-from lsst.cwfs.algo import Algorithm
+from lsst.cwfs.instrument import Instrument
+from lsst.cwfs.algorithm import Algorithm
 from lsst.cwfs.image import Image
 
 imgDir = ['testImages/F1.23_1mm_v61',

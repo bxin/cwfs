@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 # @package cwfs
-# @file cwfsAlgo.py
+# @file algorithm.py
 ##
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope

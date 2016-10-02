@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 # @package cwfs
-# @file cwfsImage.py
+# @file errors.py
 ##
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope

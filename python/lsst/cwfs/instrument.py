@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 # @package cwfs
-# @file cwfsInstru.py
+# @file instrument.py
 ##
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope
