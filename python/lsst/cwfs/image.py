@@ -22,33 +22,48 @@ from astropy.io import fits
 from . import tools
 from tools import ZernikeAnnularGrad, ZernikeGrad, ZernikeAnnularJacobian, ZernikeJacobian
 
+def readFile(filename):
+    image = None
+    if isinstance(filename, str):
+        if (filename.endswith(".txt")):
+            image = np.loadtxt(filename)
+            # this assumes this txt file is in the format
+            # I[0,0]   I[0,1]
+            # I[1,0]   I[1,1]
+            image = image[::-1, :]
+        elif (filename.endswith(".fits")):
+            IHDU = fits.open(filename)
+            image = IHDU[0].data
+            IHDU.close()
+
+    if image is None:
+        raise IOError("Unrecognised file type for %s" % filename)
+
+    return image
+
 class Image(object):
+    INTRA = "intra"
+    EXTRA = "extra"
 
-    def __init__(self, filename, fieldXY, type):
+    def __init__(self, image, fieldXY, type, name="?"):
+        """!Create a cwlf Image
 
-        fieldX = fieldXY[0]
-        fieldY = fieldXY[1]
+        @param image   A numpy 2-d array
+        @param fieldXY The position in the focal plane (degrees)
+        @param type    Type of image (Image.INTRA, Image.EXTRA)
+        """
+        self.image = image
+ 
+        self.fieldX, self.fieldY = fieldXY
 
-        if isinstance(filename, str):
-            if (filename.endswith(".txt")):
-                self.image = np.loadtxt(filename)
-                # this assumes this txt file is in the format
-                # I[0,0]   I[0,1]
-                # I[1,0]   I[1,1]
-                self.image = self.image[::-1, :]
-            elif (filename.endswith(".fits")):
-                IHDU = fits.open(filename)
-                self.image = IHDU[0].data
-                IHDU.close()
-        else: #the filename is already the image array
-            self.image = filename
-        self.fieldX = fieldX
-        self.fieldY = fieldY
-        # we will need self.fldr to be on denominator 
-        self.fldr = np.max((np.sqrt(self.fieldX**2 + self.fieldY**2), 1e-8))
+        if type.lower() not in (Image.INTRA, Image.EXTRA):
+            raise TypeError("Image must be intra or extra")
         self.type = type
+
+        # we will need self.fldr to be on denominator 
+        self.fldr = np.max((np.hypot(self.fieldX, self.fieldY), 1e-8))
         self.sizeinPix = self.image.shape[0]
-        self.filename = filename
+        self.name = name
 
         if self.image.shape[0] != self.image.shape[1]:
             print('%s image filename = %s ' % (type, filename))
@@ -359,7 +374,7 @@ class Image(object):
         # if (np.sum(abs(self.image - np.max(self.image))<1e-5)>4):# or np.max(self.image)>40000):
         if np.any(self.image>saturation):
             self.SNR = self.SNR * (-1)
-            print('Saturation detected: %s\n'% self.filename)
+            print('Saturation detected\n'% self.name)
         
 def linear2D(xydata, c00, c10, c01):
     (x, y) = xydata

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from lsst.cwfs.instrument import Instrument
 from lsst.cwfs.algorithm import Algorithm
-from lsst.cwfs.image import Image
+from lsst.cwfs.image import Image, readFile
 
 imgDir = ['testImages/F1.23_1mm_v61',
           'testImages/LSST_C_SN26', 'testImages/LSST_C_SN26',
@@ -47,8 +47,8 @@ def main(plot, znmax=22):
     for j in range(nTest):
         intraFile = os.path.join(imgDir[j], intra[j])
         extraFile = os.path.join(imgDir[j], extra[j])
-        I1 = Image(intraFile, fldxy[j, :], 'intra')
-        I2 = Image(extraFile, fldxy[j, :], 'extra')
+        I1 = Image(readFile(intraFile), fldxy[j, :], Image.INTRA)
+        I2 = Image(readFile(extraFile), fldxy[j, :], Image.EXTRA)
 
         inst = Instrument(myinst, I1.sizeinPix)
         algo = Algorithm(myalgo[j], inst, 1)
