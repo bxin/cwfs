@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/sh
 ##
 ## @package cwfs
 ## @file cwfs
@@ -9,5 +9,11 @@
 ## @       Large Synoptic Survey Telescope
 
 ## See the README file for its usage.
-python source/cwfs.py $argv
+
+if [ ! -z $LSST_LIBRARY_PATH ]; then	# work around os/x's SIP restrictions
+    export LD_LIBRARY_PATH=$LSST_LIBRARY_PATH
+    export DYLD_LIBRARY_PATH=$LSST_LIBRARY_PATH
+fi
+
+python $(dirname ${BASH_SOURCE[0]})/cwfs.py "$@"
 

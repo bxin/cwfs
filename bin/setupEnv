@@ -1,4 +1,3 @@
 #!/bin/bash
 
-export PYTHONPATH="$PYTHONPATH:cwfs/source/"
-
+export PYTHONPATH="$PYTHONPATH:cwfs/python/lsst/cfws"

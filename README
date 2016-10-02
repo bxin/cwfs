@@ -27,8 +27,8 @@ INSTALLATION:
     Astropy (for reading in fits images)
     Matplotlib (for making plots)
 
-    You need to add "$PWD/source/" to your $PYTHONPATH.
-	(see ./setupEnv)
+    You need to add "$PWD/python/lsst/cwfs" to your $PYTHONPATH.
+	(see ./bin/setupEnv)
 	
 ------
 USAGE#1: (on command line)
@@ -36,7 +36,7 @@ USAGE#1: (on command line)
 
     To show the help message
     
-    ./cwfs -h
+    ./bin/cwfs -h
 
     usage examples:
 

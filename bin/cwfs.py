@@ -10,13 +10,12 @@
 import os
 import argparse
 
-from lsst.cwfs.instru import Instrument
-from lsst.cwfs.algo import Algorithm
-from lsst.cwfs.image import Image
+from lsst.cwfs.instrument import Instrument
+from lsst.cwfs.algorithm import Algorithm
+from lsst.cwfs.image import Image, readFile
 from lsst.cwfs.tools import outParam, outZer4Up
 
 # main function
-
 
 def main():
 
@@ -64,11 +63,14 @@ def main():
         print(args)
 
     # load intra and extra focal images
-    intraFile = os.path.join(args.imgDir, args.intra)
-    extraFile = os.path.join(args.imgDir, args.extra)
+    intraFile, extraFile = args.intra, args.extra
 
-    I1 = Image(intraFile, args.intra_xy, 'intra')
-    I2 = Image(extraFile, args.extra_xy, 'extra')
+    if args.imgDir:
+        intraFile = os.path.join(args.imgDir, intraFile)
+        extraFile = os.path.join(args.imgDir, extraFile)
+
+    I1 = Image(readFile(intraFile), args.intra_xy, Image.INTRA)
+    I2 = Image(readFile(extraFile), args.extra_xy, Image.EXTRA)
 
     # load instrument and algorithm parameters
     inst = Instrument(args.instruFile, I1.sizeinPix)
