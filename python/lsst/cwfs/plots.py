@@ -13,15 +13,17 @@ import matplotlib.pyplot as plt
 
 from . import errors
 
-def plotImage(image, title, mask=None):
+def plotImage(image, title=None, mask=None, show=True):
     if mask is not None:
         image = np.where(mask == 0, np.nan, image)
 
     plt.imshow(image, origin='lower')
     plt.colorbar()
-    plt.title(title)
-    plt.show()
+    if title:
+        plt.title(title)
 
+    if show:
+        plt.show()
 
 def plotZer(z, unit):
     try:
