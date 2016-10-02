@@ -13,9 +13,9 @@ from lsst.cwfs.instrument import Instrument
 from lsst.cwfs.algorithm import Algorithm
 from lsst.cwfs.image import Image, readFile
 
-imgDir = ['testImages/F1.23_1mm_v61',
-          'testImages/LSST_C_SN26', 'testImages/LSST_C_SN26',
-          'testImages/LSST_NE_SN25', 'testImages/LSST_NE_SN25']
+imgDir = ['tests/testImages/F1.23_1mm_v61',
+          'tests/testImages/LSST_C_SN26', 'tests/testImages/LSST_C_SN26',
+          'tests/testImages/LSST_NE_SN25', 'tests/testImages/LSST_NE_SN25']
 intra = ['z7_0.25_intra.txt',
          'z7_0.25_intra.txt', 'z7_0.25_intra.txt',
          'z11_0.25_intra.txt', 'z11_0.25_intra.txt']
@@ -27,7 +27,7 @@ myalgo = ['fft', 'fft', 'exp', 'fft', 'exp']
 mymodel = ['paraxial', 'onAxis', 'onAxis', 'offAxis', 'offAxis']
 myinst = 'lsst'
 
-validationDir = 'validation'
+validationDir = 'tests/validation'
 matlabZFile = ['F1.23_1mm_v61_z7_0.25_fft.txt',
                'LSST_C_SN26_z7_0.25_fft.txt',
                'LSST_C_SN26_z7_0.25_exp.txt',

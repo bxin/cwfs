@@ -40,13 +40,13 @@ USAGE#1: (on command line)
 
     usage examples:
 
-    ./cwfs z11_0.25_intra.txt z11_0.25_extra.txt -dir ./testImages/LSST_NE_SN25 -ixy 1.185 1.185 -exy 1.185 1.185 -m offAxis -a exp -d -1
+    ./bin/cwfs z11_0.25_intra.txt z11_0.25_extra.txt -dir testImages/LSST_NE_SN25 -ixy 1.185 1.185 -exy 1.185 1.185 -m offAxis -a exp -d -1
 
 ------
 USAGE#2: (in Python environment)
 ------
 
-    Please see the the two iPython notebooks in the home directory:
+    Please see the the two iPython notebooks in the examples directory:
 	example1.ipynb
 	example2.ipynb
 
@@ -58,19 +58,24 @@ USAGE#2: (in Python environment)
 Directories:
 ------------
 
-    data:            all input data (instrument specific data and algorithm parameters)
-    output:         suggested dir for your outputs
-    source:         all source files 
-    testImages    intra and extra images on which you may run some initial tests
-    validation      data used together with validation.py for validation tests
+    bin               executables
+    data              all input data (instrument specific data and algorithm parameters)
+    examples          example jupyter notebooks
+    python/lsst/cwfs  all source files 
+    testImages        intra and extra images on which you may run some initial tests
+    ups               files needed to use cwlf with the LSST stack
+    tests             unit tests
 		    
--------------------
-Files in top level:
--------------------
+-----------
+Other Files
+-----------
 
-    cwfs                       main script
     COPYING                 license file
     README                  this file
-    setupEnv                 bash command to set up the python environment needed
-    validation.py            Python script for validation tests (compare to Matlab results)
-	
+
+    bin/cwfs                main script
+    bin/setupEnv            bash command to set up the python environment needed (must be sourced)
+    
+    tests/validation.py     Python script for validation tests (compare to Matlab results);
+    			    uses tests/validation.  Designed to be run from home directory.
+
