@@ -17,7 +17,7 @@ import scipy.ndimage as ndimage
 
 from . import tools
 
-class cwfsAlgo(object):
+class Algorithm(object):
 
     def __init__(self, algoFile, inst, debugLevel):
         algoDir = os.path.join(tools.getDataDir(), "algo")

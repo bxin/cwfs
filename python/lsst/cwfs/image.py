@@ -22,7 +22,7 @@ from astropy.io import fits
 from . import tools
 from tools import ZernikeAnnularGrad, ZernikeGrad, ZernikeAnnularJacobian, ZernikeJacobian
 
-class cwfsImage(object):
+class Image(object):
 
     def __init__(self, filename, fieldXY, type):
 

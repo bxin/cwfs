@@ -9,9 +9,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from lsst.cwfs.instru import cwfsInstru
-from lsst.cwfs.algo import cwfsAlgo
-from lsst.cwfs.image import cwfsImage
+from lsst.cwfs.instru import Instrument
+from lsst.cwfs.algo import Algorithm
+from lsst.cwfs.image import Image
 
 imgDir = ['testImages/F1.23_1mm_v61',
           'testImages/LSST_C_SN26', 'testImages/LSST_C_SN26',
@@ -45,11 +45,11 @@ fig = plt.figure(figsize=(10, 10))
 for j in range(0, nTest):
     intraFile = os.path.join(imgDir[j], intra[j])
     extraFile = os.path.join(imgDir[j], extra[j])
-    I1 = cwfsImage(intraFile, fldxy[j, :], 'intra')
-    I2 = cwfsImage(extraFile, fldxy[j, :], 'extra')
+    I1 = Image(intraFile, fldxy[j, :], 'intra')
+    I2 = Image(extraFile, fldxy[j, :], 'extra')
 
-    inst = cwfsInstru(myinst, I1.sizeinPix)
-    algo = cwfsAlgo(myalgo[j], inst, 1)
+    inst = Instrument(myinst, I1.sizeinPix)
+    algo = Algorithm(myalgo[j], inst, 1)
     algo.runIt(inst, I1, I2, mymodel[j])
     zer[:, j] = algo.zer4UpNm
 

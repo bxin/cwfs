@@ -10,9 +10,9 @@
 import os
 import argparse
 
-from lsst.cwfs.instru import cwfsInstru
-from lsst.cwfs.algo import cwfsAlgo
-from lsst.cwfs.image import cwfsImage
+from lsst.cwfs.instru import Instrument
+from lsst.cwfs.algo import Algorithm
+from lsst.cwfs.image import Image
 from lsst.cwfs.tools import outParam, outZer4Up
 
 # main function
@@ -67,12 +67,12 @@ def main():
     intraFile = os.path.join(args.imgDir, args.intra)
     extraFile = os.path.join(args.imgDir, args.extra)
 
-    I1 = cwfsImage(intraFile, args.intra_xy, 'intra')
-    I2 = cwfsImage(extraFile, args.extra_xy, 'extra')
+    I1 = Image(intraFile, args.intra_xy, 'intra')
+    I2 = Image(extraFile, args.extra_xy, 'extra')
 
     # load instrument and algorithm parameters
-    inst = cwfsInstru(args.instruFile, I1.sizeinPix)
-    algo = cwfsAlgo(args.algoFile, inst, args.debugLevel)
+    inst = Instrument(args.instruFile, I1.sizeinPix)
+    algo = Algorithm(args.algoFile, inst, args.debugLevel)
 
     # run it
     algo.runIt(inst, I1, I2, args.model)

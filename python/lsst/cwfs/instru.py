@@ -10,7 +10,7 @@ import os
 import numpy as np
 from . import tools
 
-class cwfsInstru(object):
+class Instrument(object):
 
     def __init__(self, instruFile, sensorSamples):
         self.instDir = os.path.join(tools.getDataDir(), instruFile)
