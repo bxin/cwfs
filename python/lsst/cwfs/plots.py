@@ -8,10 +8,15 @@
 
 import sys
 
+import numpy as np
 import matplotlib.pyplot as plt
+
 from . import errors
 
-def plotImage(image, title):
+def plotImage(image, title, mask=None):
+    if mask is not None:
+        image = np.where(mask == 0, np.nan, image)
+
     plt.imshow(image, origin='lower')
     plt.colorbar()
     plt.title(title)
