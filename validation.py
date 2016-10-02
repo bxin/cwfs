@@ -13,9 +13,9 @@ from lsst.cwfs.instru import cwfsInstru
 from lsst.cwfs.algo import cwfsAlgo
 from lsst.cwfs.image import cwfsImage
 
-imgDir = ['../testImages/F1.23_1mm_v61',
-          '../testImages/LSST_C_SN26', '../testImages/LSST_C_SN26',
-          '../testImages/LSST_NE_SN25', '../testImages/LSST_NE_SN25']
+imgDir = ['testImages/F1.23_1mm_v61',
+          'testImages/LSST_C_SN26', 'testImages/LSST_C_SN26',
+          'testImages/LSST_NE_SN25', 'testImages/LSST_NE_SN25']
 intra = ['z7_0.25_intra.txt',
          'z7_0.25_intra.txt', 'z7_0.25_intra.txt',
          'z11_0.25_intra.txt', 'z11_0.25_intra.txt']
