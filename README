@@ -76,6 +76,7 @@ Other Files
     bin/cwfs                main script
     bin/setupEnv            bash command to set up the python environment needed (must be sourced)
     
-    tests/validation.py     Python script for validation tests (compare to Matlab results);
-    			    uses tests/validation.  Designed to be run from home directory.
+    tests/testValidate.py   Python script for validation tests (compare to Matlab results);
+    			    uses tests/validation.  Designed to be run from home directory,
+			    or (more usually) via the unittest framework.
 
