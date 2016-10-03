@@ -1,2 +1,4 @@
+setupOptional(sconsUtils)
+
 pathPrepend(PATH, ${PRODUCT_DIR}/bin)
 pathPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)

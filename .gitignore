@@ -1,2 +1,6 @@
 *.pyc
 *.ipynb
+.sconf_temp
+.sconsign.dblite
+config.log
+python/lsst/cwfs/version.py
