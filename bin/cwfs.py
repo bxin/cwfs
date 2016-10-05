@@ -69,8 +69,8 @@ def main():
         intraFile = os.path.join(args.imgDir, intraFile)
         extraFile = os.path.join(args.imgDir, extraFile)
 
-    I1 = Image(readFile(intraFile), args.intra_xy, Image.INTRA)
-    I2 = Image(readFile(extraFile), args.extra_xy, Image.EXTRA)
+    I1 = Image(readFile(intraFile), args.intra_xy, Image.INTRA, intraFile)
+    I2 = Image(readFile(extraFile), args.extra_xy, Image.EXTRA, intraFile)
 
     # load instrument and algorithm parameters
     inst = Instrument(args.instruFile, I1.sizeinPix)

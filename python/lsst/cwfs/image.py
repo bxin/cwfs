@@ -20,7 +20,9 @@ from scipy import optimize
 from astropy.io import fits
 
 from . import tools
-from tools import ZernikeAnnularGrad, ZernikeGrad, ZernikeAnnularJacobian, ZernikeJacobian
+from lsst.cwfs.tools import ZernikeAnnularGrad, ZernikeGrad, \
+    ZernikeAnnularJacobian, ZernikeJacobian
+
 
 def readFile(filename):
     image = None
@@ -41,38 +43,39 @@ def readFile(filename):
 
     return image
 
+
 class Image(object):
     INTRA = "intra"
     EXTRA = "extra"
 
     def __init__(self, image, fieldXY, type, name="?"):
-        """!Create a cwlf Image
+        """!Create a cwfs Image
 
         @param image   A numpy 2-d array
         @param fieldXY The position in the focal plane (degrees)
         @param type    Type of image (Image.INTRA, Image.EXTRA)
         """
         self.image = image
- 
+
         self.fieldX, self.fieldY = fieldXY
 
         if type.lower() not in (Image.INTRA, Image.EXTRA):
             raise TypeError("Image must be intra or extra")
         self.type = type
 
-        # we will need self.fldr to be on denominator 
+        # we will need self.fldr to be on denominator
         self.fldr = np.max((np.hypot(self.fieldX, self.fieldY), 1e-8))
         self.sizeinPix = self.image.shape[0]
         self.name = name
 
         if self.image.shape[0] != self.image.shape[1]:
-            print('%s image filename = %s ' % (type, filename))
+            print('%s image filename = %s ' % (type, name))
             print('%s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
             print('Error: Only square image stamps are accepted.')
             sys.exit()
         elif self.image.shape[0] % 2 == 1:
-            print('%s image filename = %s ' % (type, filename))
+            print('%s image filename = %s ' % (type, name))
             print('%s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
             print('Error: number of pixels cannot be odd numbers')
@@ -135,15 +138,19 @@ class Image(object):
             self.cMask = self.cMask * cMaskii
 
     def getOffAxisCorr(self, instDir, order):
-        self.offAxis_coeff = np.zeros((4, (order + 1) * (order + 2) / 2))            
+        self.offAxis_coeff = np.zeros((4, (order + 1) * (order + 2) / 2))
         self.offAxis_coeff[0, :], self.offAxisOffset = getOffAxisCorr_single(
-            os.path.join(instDir, 'offAxis_cxin_poly%d.txt' % (order)), self.fldr)
+            os.path.join(instDir, 'offAxis_cxin_poly%d.txt' % (order)),
+            self.fldr)
         self.offAxis_coeff[1, :], _ = getOffAxisCorr_single(
-            os.path.join(instDir, 'offAxis_cyin_poly%d.txt' % (order)), self.fldr)
+            os.path.join(instDir, 'offAxis_cyin_poly%d.txt' % (order)),
+            self.fldr)
         self.offAxis_coeff[2, :], _ = getOffAxisCorr_single(
-            os.path.join(instDir, 'offAxis_cxex_poly%d.txt' % (order)), self.fldr)
+            os.path.join(instDir, 'offAxis_cxex_poly%d.txt' % (order)),
+            self.fldr)
         self.offAxis_coeff[3, :], _ = getOffAxisCorr_single(
-            os.path.join(instDir, 'offAxis_cyex_poly%d.txt' % (order)), self.fldr)
+            os.path.join(instDir, 'offAxis_cyex_poly%d.txt' % (order)),
+            self.fldr)
 
     def upResolution(self, oversample, lm, ln):
 
@@ -229,10 +236,10 @@ class Image(object):
 
         show_lutxyp = showProjection(
             lutxp, lutyp, inst.sensorFactor, projSamples, 0)
-        if (np.all(show_lutxyp<=0)):
+        if (np.all(show_lutxyp <= 0)):
             self.caustic = 1
             return
-        
+
         realcx, realcy, tmp = getCenterAndR_ef(self.image)
         show_lutxyp = tools.padArray(show_lutxyp, projSamples + 20)
 
@@ -310,7 +317,7 @@ class Image(object):
         # self.image < 0 will not be physical, remove that region
         # x(self.image<0) = NaN;
         self.caustic = 0
-        if (np.any(self.image<0) and np.all(self.image0>=0)):
+        if (np.any(self.image < 0) and np.all(self.image0 >= 0)):
             print(
                 'WARNING: negative scale parameter, \
             image is within caustic, zcCol (in um)=\n')
@@ -329,65 +336,68 @@ class Image(object):
         self.centerx, self.centery, tmp = getCenterAndR_ef(self.image)
         xmax = self.image.shape[1]
         ymax = self.image.shape[0]
-        yfull, xfull = np.mgrid[1:xmax+1,1:ymax+1]
-        c0 = [self.image[np.max((0, np.round(ymax/2-1.5*outerR))),
-                         np.max((0, np.round(xmax/2-1.5*outerR)))], 0, 0]
+        yfull, xfull = np.mgrid[1:xmax + 1, 1:ymax + 1]
+        c0 = [self.image[np.max((0, np.round(ymax / 2 - 1.5 * outerR))),
+                         np.max((0, np.round(xmax / 2 - 1.5 * outerR)))], 0, 0]
 
-        rfull = np.sqrt((xfull-self.centerx)**2 + (yfull-self.centery)**2)
+        rfull = np.sqrt((xfull - self.centerx)**2 + (yfull - self.centery)**2)
 
-        idx = (rfull < 2.5*outerR) & (rfull > 1.5*outerR)
+        idx = (rfull < 2.5 * outerR) & (rfull > 1.5 * outerR)
 
         x = xfull[idx]
         y = yfull[idx]
         z = self.image[idx]
-        popt, pcov = optimize.curve_fit(linear2D, (x,y), z, p0=c0)
+        popt, pcov = optimize.curve_fit(linear2D, (x, y), z, p0=c0)
 
         zfull = linear2D((xfull, yfull), *popt)
         if debugLevel >= 1:
             print(self.centerx, self.centery)
 
-        self.image =  self.image - zfull
+        self.image = self.image - zfull
 
     def normalizeI(self, outerR, obsR):
         xmax = self.image.shape[1]
         ymax = self.image.shape[0]
-        yfull, xfull = np.mgrid[1:xmax+1,1:ymax+1]
-        
-        rfull = np.sqrt((xfull-self.centerx)**2 + (yfull-self.centery)**2)
-        idxsig = (rfull < 1.0*outerR) & (rfull > obsR*outerR)
+        yfull, xfull = np.mgrid[1:xmax + 1, 1:ymax + 1]
 
-        self.image = self.image/sum(self.image[idxsig])
-                        
+        rfull = np.sqrt((xfull - self.centerx)**2 + (yfull - self.centery)**2)
+        idxsig = (rfull < 1.0 * outerR) & (rfull > obsR * outerR)
+
+        self.image = self.image / sum(self.image[idxsig])
+
     def getSNR(self, outerR, obsR, saturation=1e10):
         xmax = self.image.shape[1]
         ymax = self.image.shape[0]
-        yfull, xfull = np.mgrid[1:xmax+1,1:ymax+1]
-        
-        rfull = np.sqrt((xfull-self.centerx)**2 + (yfull-self.centery)**2)
-        idxsig = (rfull < 1.0*outerR) & (rfull > obsR*outerR)
-        idxbg = (rfull < 2.5*outerR) & (rfull > 1.5*outerR)
+        yfull, xfull = np.mgrid[1:xmax + 1, 1:ymax + 1]
+
+        rfull = np.sqrt((xfull - self.centerx)**2 + (yfull - self.centery)**2)
+        idxsig = (rfull < 1.0 * outerR) & (rfull > obsR * outerR)
+        idxbg = (rfull < 2.5 * outerR) & (rfull > 1.5 * outerR)
 
         self.SNRsig = np.mean(self.image[idxsig])
-        self.SNRbg = np.std(self.image[idxbg]-np.mean(self.image[idxbg]))
-        self.SNR = self.SNRsig/self.SNRbg
+        self.SNRbg = np.std(self.image[idxbg] - np.mean(self.image[idxbg]))
+        self.SNR = self.SNRsig / self.SNRbg
         # if saturated, set SNR to negative
-        # if (np.sum(abs(self.image - np.max(self.image))<1e-5)>4):# or np.max(self.image)>40000):
-        if np.any(self.image>saturation):
+        # if (np.sum(abs(self.image - np.max(self.image))<1e-5)>4):# or
+        # np.max(self.image)>40000):
+        if np.any(self.image > saturation):
             self.SNR = self.SNR * (-1)
-            print('Saturation detected\n'% self.name)
-        
+            print('Saturation detected\n' % self.name)
+
+
 def linear2D(xydata, c00, c10, c01):
     (x, y) = xydata
-    f = c00+c10*x+c01*y
+    f = c00 + c10 * x + c01 * y
     return f
-            
+
+
 def getOffAxisCorr_single(confFile, fldr):
     cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
     cwfsBaseDir = '%s/../' % cwfsSrcDir
     cdata = np.loadtxt(os.path.join(cwfsBaseDir, confFile))
     c = cdata[:, 1:]
-    offset = cdata[0,0]
-    
+    offset = cdata[0, 0]
+
     ruler = np.sqrt(c[:, 0]**2 + c[:, 1]**2)
 #    print ruler, fldr, (ruler >= fldr).argmax(), (ruler >= fldr).argmin()
     step = ruler[1] - ruler[0]
@@ -395,7 +405,7 @@ def getOffAxisCorr_single(confFile, fldr):
     p2 = (ruler >= fldr)
 #    print "FINE",p2, p2.shape
     if (np.count_nonzero(p2) == 0):  # fldr is too large to be in range
-        p2 = c.shape[0]-1
+        p2 = c.shape[0] - 1
         p1 = p2
         w1 = 1
         w2 = 0
@@ -453,7 +463,7 @@ def interpMaskParam(fieldX, fieldY, maskParam):
 
 def rotateMaskParam(ca, cb, fieldX, fieldY):
 
-    #so that fldr is never zero (see next line)
+    # so that fldr is never zero (see next line)
     fldr = np.max((np.sqrt(fieldX**2 + fieldY**2), 1e-8))
     c = fieldX / fldr
     s = fieldY / fldr
@@ -498,7 +508,6 @@ def getCenterAndR_ef(oriArray, readRand=1):
     # Matlab, read in these random numbers generated from Matlab
     if readRand:
         iRand = 0
-        cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
         algoDir = os.path.join(tools.getDataDir(), "algo")
         myRand = np.loadtxt(os.path.join(algoDir, 'testRand.txt'))
         myRand = np.tile(np.reshape(myRand, (1000, 1)), (10, 1))
@@ -605,7 +614,7 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
     elif (Im.type == 'extra'):
         myC = inst.focalLength * (inst.focalLength / inst.offset + 1) / R**2
 
-    polyFunc     = tools.getFunction('poly%d_2D'  % algo.offAxisPolyOrder)
+    polyFunc = tools.getFunction('poly%d_2D' % algo.offAxisPolyOrder)
     polyGradFunc = tools.getFunction('poly%dGrad' % algo.offAxisPolyOrder)
 
     lutr = np.sqrt(lutx**2 + luty**2)
@@ -630,7 +639,7 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
         lutx, luty = createPupilGrid(
             lutx, luty, onepixel,
             Im.maskCa, Im.maskCb, Im.maskRa, Im.maskRb,
-            Im.fieldX, Im.fieldY) 
+            Im.fieldX, Im.fieldY)
 
     if (model == 'paraxial'):
         lutxp = lutx
@@ -650,14 +659,14 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
         tt = Im.offAxisOffset
         if (Im.type == 'intra'):
             cx = (Im.offAxis_coeff[0, :] - Im.offAxis_coeff[2, :]) * \
-                (tt + inst.offset) / (2*tt) + Im.offAxis_coeff[2, :]
+                (tt + inst.offset) / (2 * tt) + Im.offAxis_coeff[2, :]
             cy = (Im.offAxis_coeff[1, :] - Im.offAxis_coeff[3, :]) * \
-                (tt + inst.offset) / (2*tt) + Im.offAxis_coeff[3, :]
+                (tt + inst.offset) / (2 * tt) + Im.offAxis_coeff[3, :]
         elif (Im.type == 'extra'):
             cx = (Im.offAxis_coeff[0, :] - Im.offAxis_coeff[2, :]) * \
-                (tt - inst.offset) / (2*tt) + Im.offAxis_coeff[2, :]
+                (tt - inst.offset) / (2 * tt) + Im.offAxis_coeff[2, :]
             cy = (Im.offAxis_coeff[1, :] - Im.offAxis_coeff[3, :]) * \
-                (tt - inst.offset) / (2*tt) + Im.offAxis_coeff[3, :]
+                (tt - inst.offset) / (2 * tt) + Im.offAxis_coeff[3, :]
             cx = -cx  # this will be inverted back by typesign later on.
             # we do the inversion here to make the (x,y)->(x',y') equations has
             # the same form as the paraxial case.

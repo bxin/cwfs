@@ -17,6 +17,7 @@ import scipy.ndimage as ndimage
 
 from . import tools
 
+
 class Algorithm(object):
 
     def __init__(self, algoFile, inst, debugLevel):
@@ -36,7 +37,8 @@ class Algorithm(object):
                 elif (line.startswith('Num_of_Zernikes')):
                     self.numTerms = int(line.split()[1])
                 elif (line.startswith('ZTerms')):
-                    self.ZTerms = np.hstack(([1, 2, 3], [int(x) for x in line.split()[1:]]))
+                    self.ZTerms = np.hstack(
+                        ([1, 2, 3], [int(x) for x in line.split()[1:]]))
                 elif (line.startswith('Num_of_outer_itr')):
                     self.outerItr = int(line.split()[1])
                 elif (line.startswith('Num_of_inner_itr')):
@@ -329,8 +331,10 @@ class Algorithm(object):
                     F[i] = np.sum(np.sum(
                         self.dI * tools.ZernikeEval(
                             zcCol, xSensor, ySensor))) * aperturePixelSize**2
-                    dZidx[i, :, :] = tools.ZernikeGrad(zcCol, xSensor, ySensor, 'dx')
-                    dZidy[i, :, :] = tools.ZernikeGrad(zcCol, xSensor, ySensor, 'dy')
+                    dZidx[i, :, :] = tools.ZernikeGrad(
+                        zcCol, xSensor, ySensor, 'dx')
+                    dZidy[i, :, :] = tools.ZernikeGrad(
+                        zcCol, xSensor, ySensor, 'dy')
                 zcCol[i] = 0
 
             self.Mij = np.zeros((self.numTerms, self.numTerms))
@@ -476,7 +480,7 @@ be of same size.')
                     if (I1.caustic == 1 or I2.caustic == 1):
                         self.converge[:, j] = self.converge[:, j - 1]
                         self.caustic = 1
-                        return  #done with this singleItr()
+                        return  # done with this singleItr()
                     I1, I2 = applyI1I2pMask(self, I1, I2)
                     self.solvePoissonEq(inst, I1, I2, j)
                     if self.PoissonSolver == 'fft':

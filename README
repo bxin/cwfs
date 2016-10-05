@@ -28,7 +28,8 @@ INSTALLATION:
     Matplotlib (for making plots)
 
     You need to add "$PWD/python/lsst/cwfs" to your $PYTHONPATH.
-	(see ./bin/setupEnv)
+	(or, you can simply do
+	. ./bin/setupEnv)
 	
 ------
 USAGE#1: (on command line)
@@ -40,7 +41,7 @@ USAGE#1: (on command line)
 
     usage examples:
 
-    ./bin/cwfs z11_0.25_intra.txt z11_0.25_extra.txt -dir testImages/LSST_NE_SN25 -ixy 1.185 1.185 -exy 1.185 1.185 -m offAxis -a exp -d -1
+    ./bin/cwfs z11_0.25_intra.txt z11_0.25_extra.txt -dir tests/testImages/LSST_NE_SN25 -ixy 1.185 1.185 -exy 1.185 1.185 -m offAxis -a exp -d -1
 
 ------
 USAGE#2: (in Python environment)
@@ -62,10 +63,12 @@ Directories:
     data              all input data (instrument specific data and algorithm parameters)
     examples          example jupyter notebooks
     python/lsst/cwfs  all source files 
-    testImages        intra and extra images on which you may run some initial tests
-    ups               files needed to use cwlf with the LSST stack
+    ups               files needed to use cwfs with the LSST stack
     tests             unit tests
-		    
+    tests/testImages        intra and extra images on which you may run some initial tests
+    tests/validation	    Matlab Results using test images in tests/testImages.
+    			    	   These are used by tests/testValidation.py
+    
 -----------
 Other Files
 -----------

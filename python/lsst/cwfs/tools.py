@@ -11,7 +11,7 @@ import os
 import sys
 import numpy as np
 
-from errors import unknownUnitError
+from lsst.cwfs.errors import unknownUnitError
 
 
 def padArray(inArray, dim):
@@ -43,7 +43,7 @@ def ZernikeAnnularGrad(Z, x, y, e, type):
         print('ZernikeAnnularEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z = np.hstack((Z, np.zeros(22-len(Z))))
+        Z = np.hstack((Z, np.zeros(22 - len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -372,7 +372,7 @@ def ZernikeGrad(Z, x, y, atype):
         print('ZernikeGrad() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z = np.hstack((Z, np.zeros(22-len(Z))))
+        Z = np.hstack((Z, np.zeros(22 - len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -449,7 +449,7 @@ def ZernikeJacobian(Z, x, y, atype):
         print('ZernikeGrad() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z = np.hstack((Z, np.zeros(22-len(Z))))
+        Z = np.hstack((Z, np.zeros(22 - len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -535,7 +535,7 @@ def ZernikeAnnularJacobian(Z, x, y, e, atype):
         print('ZernikeAnnularEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z = np.hstack((Z, np.zeros(22-len(Z))))
+        Z = np.hstack((Z, np.zeros(22 - len(Z))))
 
     x2 = x * x
     y2 = y * y
@@ -709,7 +709,7 @@ def ZernikeAnnularJacobian(Z, x, y, e, atype):
 
     return j
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #
 # Any function you want to use by name outside this file must be put into
 # the initialisation dict __funcTable, which is set after all the functions
@@ -717,6 +717,7 @@ def ZernikeAnnularJacobian(Z, x, y, e, atype):
 #
 # They are retrieved using func = getFunction(name), e.g.
 #     polyFunc = tools.getFunction('poly%d_2D'  % algo.offAxisPolyOrder)
+
 
 def _poly10_2D(c, data, y=None):
 
@@ -811,17 +812,19 @@ def _poly10Grad(c, x, y, atype):
 try:
     __funcTable
 except NameError:
-    __funcTable = dict(poly10_2D  = _poly10_2D,
-                       poly10Grad = _poly10Grad,
+    __funcTable = dict(poly10_2D=_poly10_2D,
+                       poly10Grad=_poly10Grad,
                        )
+
 
 def getFunction(name):
     if name in __funcTable:
         return __funcTable[name]
 
-    raise RuntimeError("Unknown function name in lsst.cwfs.tools: \"%s\"" % name)
+    raise RuntimeError(
+        "Unknown function name in lsst.cwfs.tools: \"%s\"" % name)
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 def extractArray(inArray, dim):
@@ -901,7 +904,7 @@ def ZernikeEval(Z, x, y):
         print('ZernikeEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z = np.hstack((Z, np.zeros(22-len(Z))))
+        Z = np.hstack((Z, np.zeros(22 - len(Z))))
 
     r2 = x * x + y * y
     r = np.sqrt(r2)
@@ -996,7 +999,7 @@ def ZernikeAnnularEval(Z, x, y, e):
         print('ZernikeAnnularEval() is not implemented with >22 terms')
         return
     elif len(Z) < 22:
-        Z = np.hstack((Z, np.zeros(22-len(Z))))
+        Z = np.hstack((Z, np.zeros(22 - len(Z))))
 
     r2 = x * x + y * y
     r = np.sqrt(r2)
@@ -1101,9 +1104,9 @@ def outParam(filename, algo, inst, I1, I2, model):
         fout = open(filename, 'w')
 
     fout.write('intra image: \t %s \t field in deg =(%6.3f, %6.3f)\n' %
-               (I1.filename, I1.fieldX, I1.fieldY))
+               (I1.name, I1.fieldX, I1.fieldY))
     fout.write('extra image: \t %s \t field in deg =(%6.3f, %6.3f)\n' %
-               (I2.filename, I2.fieldX, I2.fieldY))
+               (I2.name, I2.fieldX, I2.fieldY))
     fout.write('Using optical model:\t %s\n' % model)
     fout.write('\n')
     finst = open(inst.filename)
@@ -1165,5 +1168,4 @@ def getDataDir():
     N.b. this needs to be rethought, but it's OK for now"""
 
     cwfsSrcDir = os.path.split(os.path.abspath(__file__))[0]
-    return  os.path.join(cwfsSrcDir, '..', '..', '..', 'data')
-
+    return os.path.join(cwfsSrcDir, '..', '..', '..', 'data')

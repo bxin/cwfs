@@ -10,6 +10,7 @@ import os
 import numpy as np
 from . import tools
 
+
 class Instrument(object):
 
     def __init__(self, instruFile, sensorSamples):
@@ -35,7 +36,8 @@ class Instrument(object):
                     self.pixelSize = float(line.split()[-1])
         fid.close()
         self.fno = self.focalLength / self.apertureDiameter
-        self.marginalFL = np.sqrt(self.focalLength**2 - (self.apertureDiameter/2)**2)
+        self.marginalFL = np.sqrt(
+            self.focalLength**2 - (self.apertureDiameter / 2)**2)
         self.maskParam = os.path.join(self.instDir, 'mask_migrate.txt')
 
         # the below need to be instrument parameters, b/c it is not specific

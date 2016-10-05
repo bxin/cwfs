@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 from . import errors
 
+
 def plotImage(image, title=None, mask=None, show=True):
     if mask is not None:
         image = np.where(mask == 0, np.nan, image)
@@ -24,6 +25,7 @@ def plotImage(image, title=None, mask=None, show=True):
 
     if show:
         plt.show()
+
 
 def plotZer(z, unit):
     try:
