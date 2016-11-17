@@ -36,7 +36,7 @@ def plotZer(z, unit):
         elif unit == 'um':
             z = z * 1e-3
         else:
-            raise(errors.unknownUnitError)
+            raise Exception(errors.unknownUnitError)
     except errors.unknownUnitError:
         print('Unknown unit: %s' % unit)
         print('Known options are: m, nm, um')

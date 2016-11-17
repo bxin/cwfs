@@ -457,7 +457,7 @@ be of same size.')
         if self.currentItr == 0:
             self.itr0(inst, I1, I2, model)
         else:
-            j = self.currentItr
+            j = int(self.currentItr)
 
             if self.compMode == 'zer':
                 if not self.caustic:

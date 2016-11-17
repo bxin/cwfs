@@ -138,7 +138,7 @@ class Image(object):
             self.cMask = self.cMask * cMaskii
 
     def getOffAxisCorr(self, instDir, order):
-        self.offAxis_coeff = np.zeros((4, (order + 1) * (order + 2) / 2))
+        self.offAxis_coeff = np.zeros((4, int((order + 1) * (order + 2) / 2)))
         self.offAxis_coeff[0, :], self.offAxisOffset = getOffAxisCorr_single(
             os.path.join(instDir, 'offAxis_cxin_poly%d.txt' % (order)),
             self.fldr)
@@ -525,7 +525,7 @@ def getCenterAndR_ef(oriArray, readRand=1):
             if (minind <= slide):
                 while (minval == 0):
                     minind = minind + 1
-                    minval = phist[minind - 1]
+                    minval = phist[int(minind - 1)]
                 if readRand:
                     ind = np.round(-stepsize + 2 * stepsize * myRand[iRand, 0])
                     iRand += 1
@@ -539,8 +539,8 @@ def getCenterAndR_ef(oriArray, readRand=1):
 
                 if ((minind + ind < 1) or (minind + ind > (histogram_len))):
                     continue
-                if (phist[minind + ind - 1] < (minval * thermal)):
-                    minval = phist[minind + ind - 1]
+                if (phist[int(minind + ind - 1)] < (minval * thermal)):
+                    minval = phist[int(minind + ind - 1)]
                     minind = minind + ind
             else:
                 break
@@ -830,6 +830,6 @@ def showProjection(lutxp, lutyp, sensorFactor, projSamples, raytrace):
             if raytrace:
                 show_lutxyp[yR - 1, xR - 1] = show_lutxyp[yR - 1, xR - 1] + 1
             else:
-                if show_lutxyp[yR - 1, xR - 1] < 1:
-                    show_lutxyp[yR - 1, xR - 1] = 1
+                if show_lutxyp[int(yR - 1), int(xR - 1)] < 1:
+                    show_lutxyp[int(yR - 1), int(xR - 1)] = 1
     return show_lutxyp

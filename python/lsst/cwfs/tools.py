@@ -17,14 +17,17 @@ from lsst.cwfs.errors import unknownUnitError
 def padArray(inArray, dim):
     m, n = inArray.shape
     if (m != n):
-        raise('padArray: array is not square')
+        raise Exception('padArray: array is not square')
 
+    if not isinstance(dim, int):
+        raise Exception('padArray, output dimension needs to be integer')
+    
     if m > dim:
-        raise('padArray: array is larger than dimension')
+        raise Exception('padArray: array is larger than dimension')
 
     out = np.zeros((dim, dim))
-    i = np.floor((dim - m) / 2)
-    j = i + m
+    i = int(np.floor((dim - m) / 2))
+    j = int(i + m)
     out[i:j, i:j] = inArray
 
     return out
@@ -837,8 +840,8 @@ def extractArray(inArray, dim):
         print('extractArray: array is smaller than dimension')
 
     # print "DIMEN", dim
-    i = np.floor((m - dim) / 2)
-    j = i + dim
+    i = int(np.floor((m - dim) / 2))
+    j = int(i + dim)
     out = inArray[i:j, i:j]
 
     return out
@@ -900,11 +903,11 @@ def ZernikeEval(Z, x, y):
         print('x & y are not the same size')
         exit()
 
-    if(len(Z) > 22):
-        print('ZernikeEval() is not implemented with >22 terms')
+    if(len(Z) > 28):
+        print('ZernikeEval() is not implemented with >28 terms')
         return
-    elif len(Z) < 22:
-        Z = np.hstack((Z, np.zeros(22 - len(Z))))
+    elif len(Z) < 28:
+        Z = np.hstack((Z, np.zeros(28 - len(Z))))
 
     r2 = x * x + y * y
     r = np.sqrt(r2)
@@ -924,6 +927,8 @@ def ZernikeEval(Z, x, y):
     c4 = np.cos(4 * t)
     s5 = np.sin(5 * t)
     c5 = np.cos(5 * t)
+    s6 = np.sin(6 * t)
+    c6 = np.cos(6 * t)
 
     S = Z[0] * (1 + 0 * x)  # 0*x to set NaNs properly
     S = S + Z[1] * 2 * r * c
@@ -947,7 +952,13 @@ def ZernikeEval(Z, x, y):
     S = S + Z[19] * np.sqrt(12) * r5 * c5
     S = S + Z[20] * np.sqrt(12) * r5 * s5
     S = S + Z[21] * np.sqrt(7) * (20 * r6 - 30 * r4 + 12 * r2 - 1)
-
+    S = S + Z[22] * np.sqrt(14) * (15 * r6 - 20 * r4 + 6 * r2) * s2
+    S = S + Z[23] * np.sqrt(14) * (15 * r6 - 20 * r4 + 6 * r2) * c2
+    S = S + Z[24] * np.sqrt(14) * (6 * r6 - 5 * r4) * s4
+    S = S + Z[25] * np.sqrt(14) * (6 * r6 - 5 * r4) * c4
+    S = S + Z[26] * np.sqrt(14) * r6 * s6
+    S = S + Z[27] * np.sqrt(14) * r6 * c6
+    
     return S
 
 
