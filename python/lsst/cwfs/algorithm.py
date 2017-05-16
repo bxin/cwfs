@@ -62,6 +62,7 @@ class Algorithm(object):
                 elif (line.startswith('Compensation_sequence')):
                     self.compSequence = np.loadtxt(
                         os.path.join(algoDir, line.split()[1]))
+                    self.compSequence = self.compSequence.astype(int)
                 elif (line.startswith('Sumclip_sequence')):
                     self.sumclipSequence = np.loadtxt(
                         os.path.join(algoDir, line.split()[1]))
