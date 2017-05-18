@@ -6,7 +6,7 @@
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope
 
-# getCenterAndR() is partly based on the EF wavefront sensing software
+# getCenterAndR_ef() is partly based on the EF wavefront sensing software
 # by Laplacian Optics
 
 
@@ -187,7 +187,7 @@ class Image(object):
 
     def imageCoCenter(self, inst, algo):
 
-        x1, y1, tmp = getCenterAndR_ef(self.image)
+        x1, y1, tmp = getCenterAndR(self.image)
         if algo.debugLevel >= 3:
             print('imageCoCenter: (x1,y1)=(%8.2f,%8.2f)\n' % (x1, y1))
 
@@ -240,7 +240,7 @@ class Image(object):
             self.caustic = 1
             return
 
-        realcx, realcy, tmp = getCenterAndR_ef(self.image)
+        realcx, realcy, tmp = getCenterAndR(self.image)
         show_lutxyp = tools.padArray(show_lutxyp, projSamples + 20)
 
         struct0 = ndimage.generate_binary_structure(2, 1)
@@ -254,7 +254,7 @@ class Image(object):
             show_lutxyp, structure=struct)
         show_lutxyp = tools.extractArray(show_lutxyp, projSamples)
 
-        projcx, projcy, tmp = getCenterAndR_ef(show_lutxyp.astype(float))
+        projcx, projcy, tmp = getCenterAndR(show_lutxyp.astype(float))
         projcx = projcx / (oversample)
         projcy = projcy / (oversample)
 
@@ -333,7 +333,7 @@ class Image(object):
             self.downResolution(self, oversample, sm, sn)
 
     def rmBkgd(self, outerR, debugLevel):
-        self.centerx, self.centery, tmp = getCenterAndR_ef(self.image)
+        self.centerx, self.centery, tmp = getCenterAndR(self.image)
         xmax = self.image.shape[1]
         ymax = self.image.shape[0]
         yfull, xfull = np.mgrid[1:xmax + 1, 1:ymax + 1]
@@ -475,7 +475,20 @@ def rotateMaskParam(ca, cb, fieldX, fieldY):
 
     return cax, cay, cbx, cby
 
-
+def getCenterAndR(oriArray):
+    thres = 3 # pixels
+    i = 0
+    x = 0
+    x1 = 999
+    while (abs(x-x1)>thres or abs(y-y1)>thres):
+        if i==0: #try to use the readRand = 1, for traceability
+            x, y, r = getCenterAndR_ef(oriArray)
+        else:
+            x, y, r = getCenterAndR_ef(oriArray, 0)
+        x1, y1, r1 = getCenterAndR_ef(oriArray, 0)
+        i+=1
+    return x, y, r
+    
 def getCenterAndR_ef(oriArray, readRand=1):
     # centering finding code based northcott_ef_bundle/ef/ef/efimageFunc.cc
     # this is the modified version of getCenterAndR_ef.m 6/25/14
