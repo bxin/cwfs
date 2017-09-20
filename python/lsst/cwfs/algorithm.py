@@ -48,7 +48,7 @@ class Algorithm(object):
                 elif (line.startswith('Increase_resolution')):
                     self.upReso = float(line.split()[1])
                 elif (line.startswith('FFT_dimension')):
-                    self.padDim = float(line.split()[2])
+                    self.padDim = int(line.split()[2])
                 elif (line.startswith('Feedback_gain')):
                     self.feedbackGain = float(line.split()[1])
                 elif (line.startswith('Compensator_oversample')):
@@ -101,7 +101,7 @@ class Algorithm(object):
         # if padDim==999, get the minimum padDim possible based on image size.
         try:
             if ((self.PoissonSolver == 'fft') and (self.padDim == 999)):
-                self.padDim = 2**np.ceil(np.log2(inst.sensorSamples))
+                self.padDim = int(2**np.ceil(np.log2(inst.sensorSamples)))
         except AttributeError:
             pass
 
@@ -204,7 +204,7 @@ class Algorithm(object):
             u2v2 = -4 * (np.pi**2) * (u * u + v * v)
 
             # Set origin to Inf and 0 to result in 0 at origin after filtering
-            ctrIdx = np.floor(self.padDim / 2)
+            ctrIdx = int(np.floor(self.padDim / 2))
             u2v2[ctrIdx, ctrIdx] = np.inf
 
             self.createSignal(inst, I1, I2, cliplevel)
