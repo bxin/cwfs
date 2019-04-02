@@ -343,12 +343,12 @@ class Algorithm(object):
                 for j in range(self.numTerms):
                     self.Mij[i, j] = aperturePixelSize**2 /\
                         (inst.apertureDiameter / 2)**2 * \
-                        np.sum(np.sum(
+                        np.sum(
                             self.image *
                             (dZidx[i, :, :].squeeze() *
                              dZidx[j, :, :].squeeze() +
                              dZidy[i, :, :].squeeze() *
-                             dZidy[j, :, :].squeeze())))
+                             dZidy[j, :, :].squeeze()))
 
             dz = 2 * inst.focalLength * \
                 (inst.focalLength - inst.offset) / inst.offset
