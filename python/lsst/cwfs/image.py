@@ -351,11 +351,14 @@ class Image(object):
             self.SNR = self.SNR * (-1)
             print('Saturation detected\n' % self.name)
 
-    def centerOnProjection(self, template):
+    def centerOnProjection(self, template, window=20):
         length = self.image.shape[0]
         center = length // 2
         corr = correlate(self.image, template, mode='same')
-        idx = np.argmax(corr)
+        mask = np.zeros(corr.shape)
+        r = window // 2
+        mask[center-r:center+r,center-r:center+r] = 1
+        idx = np.argmax(corr * mask)
         xmatch = (idx // length)
         ymatch = (idx % length)
         dx = center - xmatch
