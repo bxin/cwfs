@@ -84,7 +84,7 @@ class Image(object):
     def makeMaskList(self, inst, model):
         if (model == 'paraxial' or model == 'onAxis'):
             if inst.obscuration == 0:
-                self.masklist = np.array([0, 0, 1, 1])
+                self.masklist = np.array([[0, 0, 1, 1]])
             else:
                 self.masklist = np.array([[0, 0, 1, 1],
                                           [0, 0, inst.obscuration, 0]])
