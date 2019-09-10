@@ -177,7 +177,7 @@ class Image(object):
                                   j * oversample:(j + 1) * oversample]
                 idx = (~np.isnan(subI)).nonzero()
                 if np.sum(np.sum(subI)) > 0:
-                    newI[i, j] = np.sum(subI(idx))
+                    newI[i, j] = np.sum(subI[idx])
                     newI[i, j] = newI[i, j] / np.sum(np.sum(idx))
                 else:
                     newI[i, j] = np.nan
@@ -718,7 +718,7 @@ def showProjection(lutxp, lutyp, sensorFactor, projSamples, raytrace):
 
         if (xR > 0 and xR < n2 and yR > 0 and yR < n1):
             if raytrace:
-                show_lutxyp[yR - 1, xR - 1] = show_lutxyp[yR - 1, xR - 1] + 1
+                show_lutxyp[int(yR - 1), int(xR - 1)] += 1
             else:
                 if show_lutxyp[int(yR - 1), int(xR - 1)] < 1:
                     show_lutxyp[int(yR - 1), int(xR - 1)] = 1
