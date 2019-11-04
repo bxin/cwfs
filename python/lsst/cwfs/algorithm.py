@@ -343,12 +343,12 @@ class Algorithm(object):
                 for j in range(self.numTerms):
                     self.Mij[i, j] = aperturePixelSize**2 /\
                         (inst.apertureDiameter / 2)**2 * \
-                        np.sum(np.sum(
+                        np.sum(
                             self.image *
                             (dZidx[i, :, :].squeeze() *
                              dZidx[j, :, :].squeeze() +
                              dZidy[i, :, :].squeeze() *
-                             dZidy[j, :, :].squeeze())))
+                             dZidy[j, :, :].squeeze()))
 
             dz = 2 * inst.focalLength * \
                 (inst.focalLength - inst.offset) / inst.offset
@@ -405,8 +405,9 @@ be of same size.')
             I2.getOffAxisCorr(inst.instDir, self.offAxisPolyOrder)
 
         # cocenter the images
-        I1.imageCoCenter(inst, self)
-        I2.imageCoCenter(inst, self)
+        if 'Axis' not in model:
+            I1.imageCoCenter(inst, self)
+            I2.imageCoCenter(inst, self)
 
         # we want the compensator always start from I1.image0 and I2.image0
         if hasattr(I1, 'image0') or hasattr(I2, 'image0'):

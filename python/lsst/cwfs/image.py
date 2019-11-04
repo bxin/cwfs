@@ -6,9 +6,6 @@
 # @authors: Bo Xin & Chuck Claver
 # @       Large Synoptic Survey Telescope
 
-# getCenterAndR_ef() is partly based on the EF wavefront sensing software
-# by Laplacian Optics
-
 
 import sys
 import os
@@ -16,8 +13,10 @@ import os
 import numpy as np
 import scipy.ndimage as ndimage
 import scipy.interpolate as interpolate
-from scipy import optimize
 from astropy.io import fits
+from skimage import filters
+from scipy.ndimage import center_of_mass
+from scipy.signal import correlate
 
 from . import tools
 from lsst.cwfs.tools import ZernikeAnnularGrad, ZernikeGrad, \
@@ -85,7 +84,7 @@ class Image(object):
     def makeMaskList(self, inst, model):
         if (model == 'paraxial' or model == 'onAxis'):
             if inst.obscuration == 0:
-                self.masklist = np.array([0, 0, 1, 1])
+                self.masklist = np.array([[0, 0, 1, 1]])
             else:
                 self.masklist = np.array([[0, 0, 1, 1],
                                           [0, 0, inst.obscuration, 0]])
@@ -178,7 +177,7 @@ class Image(object):
                                   j * oversample:(j + 1) * oversample]
                 idx = (~np.isnan(subI)).nonzero()
                 if np.sum(np.sum(subI)) > 0:
-                    newI[i, j] = np.sum(subI(idx))
+                    newI[i, j] = np.sum(subI[idx])
                     newI[i, j] = newI[i, j] / np.sum(np.sum(idx))
                 else:
                     newI[i, j] = np.nan
@@ -187,7 +186,7 @@ class Image(object):
 
     def imageCoCenter(self, inst, algo):
 
-        x1, y1, tmp = getCenterAndR(self.image)
+        x1, y1 = getCenter(self.image)
         if algo.debugLevel >= 3:
             print('imageCoCenter: (x1,y1)=(%8.2f,%8.2f)\n' % (x1, y1))
 
@@ -240,7 +239,6 @@ class Image(object):
             self.caustic = 1
             return
 
-        realcx, realcy, tmp = getCenterAndR(self.image)
         show_lutxyp = tools.padArray(show_lutxyp, projSamples + 20)
 
         struct0 = ndimage.generate_binary_structure(2, 1)
@@ -254,16 +252,8 @@ class Image(object):
             show_lutxyp, structure=struct)
         show_lutxyp = tools.extractArray(show_lutxyp, projSamples)
 
-        projcx, projcy, tmp = getCenterAndR(show_lutxyp.astype(float))
-        projcx = projcx / (oversample)
-        projcy = projcy / (oversample)
+        self.centerOnProjection(show_lutxyp.astype(float))
 
-        # +(-) means we need to move image to the right (left)
-        shiftx = (projcx - realcx)
-        # +(-) means we need to move image upward (downward)
-        shifty = (projcy - realcy)
-        self.image = np.roll(self.image, int(np.round(shifty)), axis=0)
-        self.image = np.roll(self.image, int(np.round(shiftx)), axis=1)
 
         # let's construct the interpolant,
         # to get the intensity on (x',p') plane
@@ -332,29 +322,6 @@ class Image(object):
         if (oversample > 1):
             self.downResolution(self, oversample, sm, sn)
 
-    def rmBkgd(self, outerR, debugLevel):
-        self.centerx, self.centery, tmp = getCenterAndR(self.image)
-        xmax = self.image.shape[1]
-        ymax = self.image.shape[0]
-        yfull, xfull = np.mgrid[1:xmax + 1, 1:ymax + 1]
-        c0 = [self.image[np.max((0, np.round(ymax / 2 - 1.5 * outerR))),
-                         np.max((0, np.round(xmax / 2 - 1.5 * outerR)))], 0, 0]
-
-        rfull = np.sqrt((xfull - self.centerx)**2 + (yfull - self.centery)**2)
-
-        idx = (rfull < 2.5 * outerR) & (rfull > 1.5 * outerR)
-
-        x = xfull[idx]
-        y = yfull[idx]
-        z = self.image[idx]
-        popt, pcov = optimize.curve_fit(linear2D, (x, y), z, p0=c0)
-
-        zfull = linear2D((xfull, yfull), *popt)
-        if debugLevel >= 1:
-            print(self.centerx, self.centery)
-
-        self.image = self.image - zfull
-
     def normalizeI(self, outerR, obsR):
         xmax = self.image.shape[1]
         ymax = self.image.shape[0]
@@ -384,6 +351,26 @@ class Image(object):
             self.SNR = self.SNR * (-1)
             print('Saturation detected\n' % self.name)
 
+    def centerOnProjection(self, template, window=20):
+        length = self.image.shape[0]
+        center = length // 2
+        corr = correlate(self.image, template, mode='same')
+        mask = np.zeros(corr.shape)
+        r = window // 2
+        mask[center-r:center+r,center-r:center+r] = 1
+        idx = np.argmax(corr * mask)
+        xmatch = (idx // length)
+        ymatch = (idx % length)
+        dx = center - xmatch
+        dy = center - ymatch
+
+        self.image = np.roll(np.roll(self.image, dx, axis=0), dy, axis=1)
+
+def getCenter(image):
+    cut = filters.threshold_otsu(image)
+    mask = image > cut
+    y, x = center_of_mass(mask)
+    return x, y
 
 def linear2D(xydata, c00, c10, c01):
     (x, y) = xydata
@@ -474,116 +461,6 @@ def rotateMaskParam(ca, cb, fieldX, fieldY):
     cby = s * cb
 
     return cax, cay, cbx, cby
-
-def getCenterAndR(oriArray):
-    thres = 3 # pixels
-    i = 0
-    x = 0
-    x1 = 999
-    while (abs(x-x1)>thres or abs(y-y1)>thres):
-        if i==0: #try to use the readRand = 1, for traceability
-            x, y, r = getCenterAndR_ef(oriArray)
-        else:
-            x, y, r = getCenterAndR_ef(oriArray, 0)
-        x1, y1, r1 = getCenterAndR_ef(oriArray, 0)
-        i+=1
-    return x, y, r
-    
-def getCenterAndR_ef(oriArray, readRand=1):
-    # centering finding code based northcott_ef_bundle/ef/ef/efimageFunc.cc
-    # this is the modified version of getCenterAndR_ef.m 6/25/14
-
-    stepsize = 20
-    nwalk = 400
-    slide = 220
-
-    histogram_len = 256
-
-    array = oriArray.copy()
-    # deblending can make over-subtraction in some area, a lower tail could
-    # form; temperary solution.
-    array[array < 0] = 0
-    m, n = array.shape
-
-    pmin = array.min()
-    pmax = array.max()
-    if (pmin == pmax):
-        print('image has min=max=%f' % pmin)
-    array1d = np.reshape(array, m * n, 1)
-
-    phist, cen = np.histogram(array1d, bins=histogram_len)
-    startidx = range(25, 175 + 25, 25)
-    # startidx=fliplr(startidx)
-    foundvalley = 0
-
-    # validating code against Matlab:
-    # to avoid differences in random number generator between NumPy and
-    # Matlab, read in these random numbers generated from Matlab
-    if readRand:
-        iRand = 0
-        algoDir = os.path.join(tools.getDataDir(), "algo")
-        myRand = np.loadtxt(os.path.join(algoDir, 'testRand.txt'))
-        myRand = np.tile(np.reshape(myRand, (1000, 1)), (10, 1))
-
-    for istartPoint in range(len(startidx)):
-        minind = startidx[istartPoint]
-        if ((minind <= 0) or (max(phist[minind - 1:]) == 0)):
-            continue
-        minval = phist[minind - 1]
-
-        # try nwalk=2000 times and see if it rolls to > slide.
-        # if it does roll off, let's change starting point (minind) to 25 less
-        # (minind starts at 175, then goes to 150, then 125
-        for i in range(nwalk + 1):
-            if (minind <= slide):
-                while (minval == 0):
-                    minind = minind + 1
-                    minval = phist[int(minind - 1)]
-                if readRand:
-                    ind = np.round(-stepsize + 2 * stepsize * myRand[iRand, 0])
-                    iRand += 1
-                    thermal = 1 + 0.5 * myRand[iRand, 0] * \
-                        np.exp(-(1.0 * i / (nwalk * 0.3)))
-                    iRand += 1
-                else:
-                    ind = np.round(stepsize * (2 * np.random.rand() - 1))
-                    thermal = 1  # +0.05*np.random.rand()
-                    # *np.exp(-(1.0*i/(nwalk*0.3)))
-
-                if ((minind + ind < 1) or (minind + ind > (histogram_len))):
-                    continue
-                if (phist[int(minind + ind - 1)] < (minval * thermal)):
-                    minval = phist[int(minind + ind - 1)]
-                    minind = minind + ind
-            else:
-                break
-        if (minind <= slide):
-            foundvalley += 1
-        if foundvalley >= 1:
-            break
-
-    # Never understood why we do this, but had it before 5/27/14, since EF C++
-    # code had this. Now this appears to cause minind> histgram_length, we
-    # comment it out and see how the code performs.
-    # minind = avind/(steps-steps/2);
-
-    # fprintf('minind=%d\n',minind);
-    if (not foundvalley):  # because of noise, there is only peak
-        minind = histogram_len / 2
-    pval = pmin + (pmax - pmin) / histogram_len * float(minind - 0.5)
-    tmp = array.copy()
-    tmp[array > max(0, pval - 1e-8)] = 1
-    tmp[array < pval] = 0
-    # because tmp is a binary mask with only 1 and 0
-    realR = np.sqrt(np.sum(tmp) / 3.1415926)
-
-    jarray, iarray = np.mgrid[1:n + 1, 1:m + 1]
-    realcx = np.sum(iarray * tmp) / np.sum(tmp)
-    realcy = np.sum(jarray * tmp) / np.sum(tmp)
-
-    # print realcx, realcy, realR
-    return realcx, realcy, realR
-
 
 def createPupilGrid(lutx, luty, onepixel, ca, cb, ra, rb, fieldX, fieldY=None):
     """Create the pupil grid"""
@@ -841,7 +718,7 @@ def showProjection(lutxp, lutyp, sensorFactor, projSamples, raytrace):
 
         if (xR > 0 and xR < n2 and yR > 0 and yR < n1):
             if raytrace:
-                show_lutxyp[yR - 1, xR - 1] = show_lutxyp[yR - 1, xR - 1] + 1
+                show_lutxyp[int(yR - 1), int(xR - 1)] += 1
             else:
                 if show_lutxyp[int(yR - 1), int(xR - 1)] < 1:
                     show_lutxyp[int(yR - 1), int(xR - 1)] = 1

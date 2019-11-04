@@ -26,23 +26,23 @@ class MatlabValidationTestCase(lsst.utils.tests.TestCase):
         cls.rootdir = pytest.config.rootdir if hasattr(pytest, "config") else "./tests"
 
         cls.myinst = 'lsst'
-        cls.validationDir = os.path.join(str(cls.rootdir), 'validation')
+        cls.validationDir = os.path.join(str(cls.rootdir), 'tests/validation')
 
         cls.tests = [
-            ('testImages/F1.23_1mm_v61', 'z7_0.25_%s.txt', (0, 0),          ('fft',),       'paraxial'),
-            ('testImages/LSST_C_SN26',   'z7_0.25_%s.txt', (0, 0),          ('fft', 'exp'), 'onAxis'),
-            ('testImages/LSST_NE_SN25',  'z11_0.25_%s.txt', (1.185, 1.185), ('fft', 'exp'), 'offAxis'),
+            ('tests/testImages/F1.23_1mm_v61', 'z7_0.25_%s.txt', (0, 0),          ('fft',),       'paraxial'),
+            ('tests/testImages/LSST_C_SN26',   'z7_0.25_%s.txt', (0, 0),          ('fft', 'exp'), 'onAxis'),
+            ('tests/testImages/LSST_NE_SN25',  'z11_0.25_%s.txt', (1.185, 1.185), ('fft', 'exp'), 'offAxis'),
             ]
         # filenames with matlab results and tolerance on absolute discrepancy (in nm)
         #
-        # N.b. these tolerances were chosen to match the values reported by Bo's validate.py,
-        # and he feels that a few 1e-2 nm is fine
+        # N.b. these tolerances are set at 10nm because centering algorithm has changed.
+        #      difference in the wavefront on the ~10nm is well below noise level.
         #
-        cls.matlabZFile_Tol = [('F1.23_1mm_v61_z7_0.25_fft.txt', 4.8e-5),
-                               ('LSST_C_SN26_z7_0.25_fft.txt',   3.6e-2),
-                               ('LSST_C_SN26_z7_0.25_exp.txt',   2.0e-2),
-                               ('LSST_NE_SN25_z11_0.25_fft.txt', 4.8e-5),
-                               ('LSST_NE_SN25_z11_0.25_exp.txt', 5.0e-5),
+        cls.matlabZFile_Tol = [('F1.23_1mm_v61_z7_0.25_fft.txt', 10),#
+                               ('LSST_C_SN26_z7_0.25_fft.txt',   10),
+                               ('LSST_C_SN26_z7_0.25_exp.txt',   10),
+                               ('LSST_NE_SN25_z11_0.25_fft.txt', 10),
+                               ('LSST_NE_SN25_z11_0.25_exp.txt', 10),
         ]
         #
         # Check that we have the right number of matlab files.  Not really a unit test, just consistency
@@ -82,8 +82,8 @@ class MatlabValidationTestCase(lsst.utils.tests.TestCase):
                 matZ = np.loadtxt(os.path.join(self.validationDir, matlabZFile))
 
                 aerr = np.abs(matZ - zer)
-                print("%-31s max(abs(err)) = %8.3g median(abs(err)) = %8.3g [Z_%d]" %
-                      (matlabZFile, np.max(aerr), np.median(aerr), self.Zernike0 + np.argmax(aerr)))
+                print("%-31s max(abs(err)) = %8.3g median(abs(err)) = %8.3g [Z_%d], tol=%.0f nm" %
+                      (matlabZFile, np.max(aerr), np.median(aerr), self.Zernike0 + np.argmax(aerr), tol))
 
                 if doPlot:
                     ax = plt.subplot(self.nTest, 1, j)

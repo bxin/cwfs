@@ -1,0 +1,6 @@
+#Auxiliary Telescope parameters:
+Obscuration                             0.3525
+Focal_length (m)                        21.6
+Aperture_diameter (m)                   1.2
+Offset (m)                              0.0205
+Pixel_size (m)                          1.44e-5
