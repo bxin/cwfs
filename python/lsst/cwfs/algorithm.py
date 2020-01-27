@@ -183,6 +183,7 @@ class Algorithm(object):
 
     def solvePoissonEq(self, inst, I1, I2, iOutItr=0):
 
+        numTerms = self.compSequence[iOutItr]
         if self.PoissonSolver == 'fft':
             '''Poisson Solver using an FFT
             '''
@@ -253,9 +254,9 @@ class Algorithm(object):
 
                 if (self.compMode == 'zer'):
 
-                    zc[:, jj] = tools.ZernikeMaskedFit(
+                    zc[:nTerms, jj] = tools.ZernikeMaskedFit(
                         West, inst.xSensor, inst.ySensor,
-                        self.numTerms, self.pMask, self.zobsR)
+                        numTerms, self.pMask, self.zobsR)
 
                 # ************************************************************
                 # BOX 6 - set dWestimate/dn = 0 around boundary
@@ -305,16 +306,16 @@ class Algorithm(object):
             xSensor = inst.xSensor * self.cMask
             ySensor = inst.ySensor * self.cMask
 
-            F = np.zeros(self.numTerms)
-            dZidx = np.zeros((self.numTerms, inst.sensorSamples,
+            F = np.zeros(numTerms)
+            dZidx = np.zeros((numTerms, inst.sensorSamples,
                               inst.sensorSamples))
             dZidy = dZidx.copy()
 
             aperturePixelSize = \
                 (inst.apertureDiameter *
                  inst.sensorFactor / inst.sensorSamples)
-            zcCol = np.zeros(self.numTerms)
-            for i in range(int(self.numTerms)):
+            zcCol = np.zeros(numTerms)
+            for i in range(int(numTerms)):
                 zcCol[i] = 1
                 # we integrate, instead of decompose, integration is faster.
                 # Also, decomposition is ill-defined on m.cMask.
@@ -338,9 +339,9 @@ class Algorithm(object):
                         zcCol, xSensor, ySensor, 'dy')
                 zcCol[i] = 0
 
-            self.Mij = np.zeros((self.numTerms, self.numTerms))
-            for i in range(self.numTerms):
-                for j in range(self.numTerms):
+            self.Mij = np.zeros((numTerms, numTerms))
+            for i in range(numTerms):
+                for j in range(numTerms):
                     self.Mij[i, j] = aperturePixelSize**2 /\
                         (inst.apertureDiameter / 2)**2 * \
                         np.sum(
@@ -354,6 +355,9 @@ class Algorithm(object):
                 (inst.focalLength - inst.offset) / inst.offset
             self.zc = np.zeros(self.numTerms)
             idx = [x - 1 for x in self.ZTerms]
+            for i in idx.copy():
+                if i+1>numTerms:
+                    idx.remove(i)
             # phi in GN paper is phase, phi/(2pi)*lambda=W
             zc_tmp = np.dot(np.linalg.pinv(self.Mij[:, idx][idx]), F[idx]) / dz
             self.zc[idx] = zc_tmp

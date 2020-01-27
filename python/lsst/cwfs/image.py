@@ -47,7 +47,7 @@ class Image(object):
     INTRA = "intra"
     EXTRA = "extra"
 
-    def __init__(self, image, fieldXY, type, name="?"):
+    def __init__(self, image, fieldXY, type):
         """!Create a cwfs Image
 
         @param image   A numpy 2-d array
@@ -64,21 +64,24 @@ class Image(object):
 
         # we will need self.fldr to be on denominator
         self.fldr = np.max((np.hypot(self.fieldX, self.fieldY), 1e-8))
-        self.sizeinPix = self.image.shape[0]
-        self.name = name
 
         if self.image.shape[0] != self.image.shape[1]:
-            print('%s image filename = %s ' % (type, name))
-            print('%s image size = (%d, %d)' % (
+            print('original %s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
-            print('Error: Only square image stamps are accepted.')
-            sys.exit()
+            d = int(abs(self.image.shape[0] -  self.image.shape[1])/2)
+            if self.image.shape[0]<self.image.shape[1]:
+                self.image = self.image[:,d:self.image.shape[0]+d]
+            else:
+                self.image = self.image[d:self.image.shape[1]+d,:]
+            print('we cut it to (%d, %d)' % (
+                self.image.shape[0], self.image.shape[1]))
         elif self.image.shape[0] % 2 == 1:
-            print('%s image filename = %s ' % (type, name))
             print('%s image size = (%d, %d)' % (
                 type, self.image.shape[0], self.image.shape[1]))
             print('Error: number of pixels cannot be odd numbers')
             sys.exit()
+
+        self.sizeinPix = self.image.shape[0]
 
     # if we pass inst.maskParam, a try: catch: is needed in cwfs.py
     def makeMaskList(self, inst, model):
@@ -349,7 +352,7 @@ class Image(object):
         # np.max(self.image)>40000):
         if np.any(self.image > saturation):
             self.SNR = self.SNR * (-1)
-            print('Saturation detected\n' % self.name)
+            print('Saturation detected\n' % self.type)
 
     def centerOnProjection(self, template, window=20):
         length = self.image.shape[0]
