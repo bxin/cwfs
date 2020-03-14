@@ -409,9 +409,8 @@ be of same size.')
             I2.getOffAxisCorr(inst.instDir, self.offAxisPolyOrder)
 
         # cocenter the images
-        if 'Axis' not in model:
-            I1.imageCoCenter(inst, self)
-            I2.imageCoCenter(inst, self)
+        I1.imageCoCenter(inst, self)
+        I2.imageCoCenter(inst, self)
 
         # we want the compensator always start from I1.image0 and I2.image0
         if hasattr(I1, 'image0') or hasattr(I2, 'image0'):
