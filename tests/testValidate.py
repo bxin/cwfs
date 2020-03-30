@@ -23,15 +23,15 @@ class MatlabValidationTestCase(lsst.utils.tests.TestCase):
         """ setup any state specific to the execution of the given class (which
         usually contains tests).
         """
-        cls.rootdir = pytest.config.rootdir if hasattr(pytest, "config") else "./tests"
+        cls.rootdir = os.path.dirname(__file__)
 
         cls.myinst = 'lsst'
-        cls.validationDir = os.path.join(str(cls.rootdir), 'tests/validation')
+        cls.validationDir = os.path.join(str(cls.rootdir), 'validation')
 
         cls.tests = [
-            ('tests/testImages/F1.23_1mm_v61', 'z7_0.25_%s.txt', (0, 0),          ('fft',),       'paraxial'),
-            ('tests/testImages/LSST_C_SN26',   'z7_0.25_%s.txt', (0, 0),          ('fft', 'exp'), 'onAxis'),
-            ('tests/testImages/LSST_NE_SN25',  'z11_0.25_%s.txt', (1.185, 1.185), ('fft', 'exp'), 'offAxis'),
+            ('testImages/F1.23_1mm_v61', 'z7_0.25_%s.txt', (0, 0),          ('fft',),       'paraxial'),
+            ('testImages/LSST_C_SN26',   'z7_0.25_%s.txt', (0, 0),          ('fft', 'exp'), 'onAxis'),
+            ('testImages/LSST_NE_SN25',  'z11_0.25_%s.txt', (1.185, 1.185), ('fft', 'exp'), 'offAxis'),
             ]
         # filenames with matlab results and tolerance on absolute discrepancy (in nm)
         #

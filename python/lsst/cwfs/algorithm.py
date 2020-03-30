@@ -254,7 +254,7 @@ class Algorithm(object):
 
                 if (self.compMode == 'zer'):
 
-                    zc[:nTerms, jj] = tools.ZernikeMaskedFit(
+                    zc[:numTerms, jj] = tools.ZernikeMaskedFit(
                         West, inst.xSensor, inst.ySensor,
                         numTerms, self.pMask, self.zobsR)
 
