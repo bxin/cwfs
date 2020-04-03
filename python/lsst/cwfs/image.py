@@ -710,19 +710,26 @@ def aperture2image(Im, inst, algo, zcCol, lutx, luty, projSamples, model):
 def showProjection(lutxp, lutyp, sensorFactor, projSamples, raytrace):
     n1, n2 = lutxp.shape
     show_lutxyp = np.zeros((n1, n2))
-    idx = (~np.isnan(lutxp)).nonzero()
-#    idx = (~np.isnan(lutxp))
-    for i, j in zip(idx[0], idx[1]):
-        # x=0.5 is center of pixel#1
-        xR = np.round((lutxp[i, j] + sensorFactor) *
-                      (projSamples / sensorFactor) / 2 + 0.5)
-        yR = np.round((lutyp[i, j] + sensorFactor) *
-                      (projSamples / sensorFactor) / 2 + 0.5)
+    idx = (~np.isnan(lutxp))
+    xR = np.zeros((n1, n2))
+    yR = np.zeros((n1, n2))
+    # x=0.5 is center of pixel#1
+    xR[idx] = np.round((lutxp[idx] + sensorFactor) *
+                  (projSamples / sensorFactor) / 2 + 0.5)
+    yR[idx] = np.round((lutyp[idx] + sensorFactor) *
+                  (projSamples / sensorFactor) / 2 + 0.5)
+    mask = np.bitwise_and(
+        np.bitwise_and(
+            np.bitwise_and(xR > 0,
+                           xR < n2),
+            yR > 0),
+        yR < n1
+    )
 
-        if (xR > 0 and xR < n2 and yR > 0 and yR < n1):
-            if raytrace:
-                show_lutxyp[int(yR - 1), int(xR - 1)] += 1
-            else:
-                if show_lutxyp[int(yR - 1), int(xR - 1)] < 1:
-                    show_lutxyp[int(yR - 1), int(xR - 1)] = 1
+    if raytrace:
+        for i,j in zip(np.array(yR - 1, dtype=int)[mask],np.array(xR - 1, dtype=int)[mask]):
+            show_lutxyp[i,j] += 1
+    else:
+        show_lutxyp[np.array(yR - 1, dtype=int)[mask],
+                    np.array(xR - 1, dtype=int)[mask]] = 1
     return show_lutxyp
