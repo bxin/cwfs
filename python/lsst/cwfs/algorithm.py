@@ -574,6 +574,10 @@ be of same size.')
 
     def reset(self, I1, I2):
         self.currentItr = 0
+        if not (I1.type == 'intra' and I2.type == 'extra'):
+            print("Input image types have to be INTRA & EXTRA")
+            sys.exit()
+
         if self.debugLevel >= 3:
             print('resetting images: I1 and I2')
 
